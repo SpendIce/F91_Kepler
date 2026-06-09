@@ -1,6 +1,6 @@
 # F91 Kepler - Codex Session Guide
 
-This repo was initially prepared with Claude Code artifacts. For Codex, the active repo contract is `AGENTS.md`.
+This repo was initially prepared with Claude Code artifacts. For Codex, the active repo contract is `AGENTS.md`; the project plan is `docs/F91_Kepler_Plan_Maestro.md`.
 
 ## What Was Found
 
@@ -9,7 +9,7 @@ This repo was initially prepared with Claude Code artifacts. For Codex, the acti
 - `.claude/settings.local.json` allows Claude to run `gcc` and two prebuilt host test binaries. Codex must not copy that into its policy because this repo says never build after changes.
 - `.claude/skills/` contains Claude-format skills for embedded systems and PCB hardware. They are not Codex-native auto-loaded skills.
 - `skills-lock.json` locks a Claude skill source and should not be treated as Codex configuration.
-- `.codex/` existed but was empty.
+- `docs/F91_Kepler_Plan_Maestro.md` is the planning source of truth for scope, phases, architecture, and resource gates.
 - No `RTK.md` file was found in the repository.
 
 ## Starting a Codex Session
@@ -23,7 +23,7 @@ codex
 Then use a scoped prompt:
 
 ```text
-Read AGENTS.md first, then read docs/phase0/00_phase0_overview.md and the task-specific spec.
+Read AGENTS.md first, then docs/F91_Kepler_Plan_Maestro.md, then docs/phase0/00_phase0_overview.md and the task-specific spec.
 Verify the relevant board definitions before editing.
 Do not build after changes.
 Do not touch unrelated dirty worktree changes.
@@ -36,6 +36,7 @@ Work only on Task N: <task name>.
 
 Read:
 - AGENTS.md
+- docs/F91_Kepler_Plan_Maestro.md
 - docs/phase0/00_phase0_overview.md
 - docs/phase0/<task spec>.md
 - any existing implementation files for this task
@@ -86,6 +87,18 @@ Use the smallest proof that matches the change:
   - `./kepler/test/test_task2`
 
 Do not compile new test binaries as part of verification.
+
+## CCS Map Gate
+
+The Plan Maestro requires `.map` inspection for RAM/flash gates. Codex still must not build.
+
+Workflow:
+
+1. The user builds in CCS or provides an existing generated map file.
+2. Codex parses the `.map` and reports flash/RAM usage against the Plan Maestro gates.
+3. Generated outputs stay uncommitted.
+
+Current high-priority gate: Task 1/2 already pass host tests, but the repo has no `.map` artifact yet. The next real project proof is CCS integration plus map review.
 
 ## Commit Discipline
 

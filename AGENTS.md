@@ -21,16 +21,24 @@
 - Be direct and technical, but explain the concepts behind the change. The user is expected to lead; Codex executes and verifies.
 - Push back on requests that skip essential context, especially embedded firmware or hardware changes where a wrong assumption can cost a board respin.
 
+## Source Of Truth
+
+- `AGENTS.md` is authoritative for Codex behavior: tools, commits, verification, and worktree hygiene.
+- `docs/F91_Kepler_Plan_Maestro.md` is authoritative for project planning, product scope, architecture, phase order, and risk gates.
+- `docs/phase0/` specs are task-level references. If they conflict with the Plan Maestro, follow the Plan Maestro and flag the conflict.
+- `CLAUDE.md`, `CLAUDE_CODE_GUIDE.md`, `.claude/`, and `skills-lock.json` are legacy Claude artifacts unless the user explicitly asks to migrate or remove them.
+
 ## Project Summary
 
 F91 Kepler is a firmware and hardware project for a Casio F91W smartwatch rebuild.
 
-- MCU: Texas Instruments CC2640R2F, ARM Cortex-M3, BLE 4.2.
+- MCU: Texas Instruments CC2640R2F, ARM Cortex-M3, Bluetooth Low Energy.
 - Firmware language: C only, no C++.
 - Main firmware baseline: `Firmware/f91_kepler_app/`.
 - New firmware modules: `kepler/`.
 - Hardware files: `Hardware/`.
 - Android placeholder app: `Software/`.
+- Master plan: `docs/F91_Kepler_Plan_Maestro.md`.
 - Phase 0 specs: `docs/phase0/`.
 - Build system: TI Code Composer Studio / TI toolchain project metadata, not Makefile or CMake.
 
@@ -39,13 +47,14 @@ F91 Kepler is a firmware and hardware project for a Casio F91W smartwatch rebuil
 For firmware work, read sources in this order before editing:
 
 1. `AGENTS.md`
-2. `docs/phase0/00_phase0_overview.md`
-3. The task-specific file in `docs/phase0/`
-4. Existing implementation under `kepler/`
-5. Original firmware under `Firmware/f91_kepler_app/Application/`
-6. Board and pin definitions, especially `Firmware/f91_kepler_app/Application/CC2640R2_KEPLER.h`
+2. `docs/F91_Kepler_Plan_Maestro.md`
+3. `docs/phase0/00_phase0_overview.md`
+4. The task-specific file in `docs/phase0/`
+5. Existing implementation under `kepler/`
+6. Original firmware under `Firmware/f91_kepler_app/Application/`
+7. Board and pin definitions from the linked SDK `Board.h`, local `f91_buttons.c`, and `kepler/kepler_config.h`
 
-When spec and implementation disagree, follow the spec only after verifying the mismatch and reporting it.
+When specs disagree, follow the Plan Maestro. When spec and implementation disagree, verify the mismatch and report it before editing.
 
 ## Embedded Firmware Rules
 
@@ -76,6 +85,8 @@ When spec and implementation disagree, follow the spec only after verifying the 
   - `rg`/`fd`/`bat` probes that confirm documentation or code contracts
   - existing prebuilt host test binaries such as `./kepler/test/test_task1` and `./kepler/test/test_task2`, when relevant
 - Do not rebuild host test binaries with `gcc` as part of verification.
+- If the Plan Maestro requires `.map` inspection, Codex does not run the CCS build. Ask the user to build in CCS or provide the generated map file, then parse and report RAM/flash margins.
+- Do not commit generated `.map`, `.out`, `.hex`, `.elf`, or `.bin` artifacts.
 - If a test binary is stale, missing, or irrelevant, say so instead of manufacturing a build step.
 
 ## Legacy Claude Artifacts
