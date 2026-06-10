@@ -98,6 +98,10 @@ void ui_push_notification(const ui_notification_t *notif);
 /* Scroll the visible notification.  delta = +1 (older) / -1 (newer).     */
 void ui_scroll_notifications(int8_t delta);
 
+/* Remove the currently selected notification from the ring (BTN_1 short  *
+ * on the NOTIFICATIONS screen).                                           */
+void ui_dismiss_selected_notification(void);
+
 /* Return count of stored notifications (0 .. KEPLER_NOTIF_RING_SIZE).    */
 uint8_t ui_notif_count(void);
 
@@ -109,6 +113,28 @@ void ui_set_finder_state(finder_state_t state);
 
 /* Called by a 1 Hz clock to blink the "RINGING" text in FINDER_RINGING.  */
 void ui_finder_blink_tick(void);
+
+/*==========================================================================*
+ *  Stopwatch / alarms (Task 6 wiring)                                      *
+ *==========================================================================*/
+
+/* Push live stopwatch state into the renderer.  laps[0] = newest; up to   *
+ * the first three are displayed.  Re-renders only on the STOPWATCH        *
+ * screen.                                                                  */
+void ui_update_stopwatch(uint32_t elapsed_cs, bool running,
+                         const uint32_t *laps, uint8_t lap_count);
+
+/* Re-render the alarm list (reads g_alarms / selection from               *
+ * alarm_service).  Call on EVT_ALARMS_UPDATE, scroll and toggle.          */
+void ui_update_alarms(void);
+
+/*==========================================================================*
+ *  Display invert (BTN_1 long — Sharp LCD "backlight" replacement)        *
+ *==========================================================================*/
+
+/* XOR the whole framebuffer and flush.  Cosmetic and reversible: calling  *
+ * with the same value twice is a no-op.                                    */
+void ui_apply_invert(bool invert);
 
 /*==========================================================================*
  *  Display flush                                                           *

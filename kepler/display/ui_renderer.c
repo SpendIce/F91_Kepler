@@ -6,62 +6,36 @@
  *
  * Weather data
  * ------------
- * struct weather_data_s is provisionally defined here for Task 1.
- * It will be replaced by the authoritative definition in
- * kepler/ble/weather_service.h when Task 5/6 is implemented.
- * At that point remove the provisional definition below and add the
- * correct #include — no other changes needed in this file.
+ * struct weather_data_s is defined in kepler/ble/weather_service.h
+ * (Task 6); temps arrive pre-converted to the display unit, with the
+ * unit letter in .unit.
  *
  * Weather icons
  * -------------
- * weather_icons.h/c is a Task 6 deliverable.  Until then, icon draw calls
- * are routed to draw_wx_stub() which renders a 16x16 or 32x32 dashed box
- * so the layout is visible and testable without the real bitmaps.
+ * Real 1-bit bitmaps from weather_icons.h for conditions 0-7; unknown
+ * conditions fall back to the dashed-box stub.
  *
  * Stopwatch / Alarms
  * ------------------
- * Dynamic data (elapsed time, lap list, alarm list) is wired in Task 5/6.
- * The renderers produce correct static layouts with placeholder values now.
+ * Live data arrives via ui_update_stopwatch() (pushed by the main loop on
+ * EVT_STOPWATCH_TICK) and ui_update_alarms() (reads alarm_service state).
  *
  *****************************************************************************/
 
 #include "ui_renderer.h"
 #include "fonts.h"
+#include "weather_icons.h"
 #include "../kepler_config.h"
+#include "../kepler_types.h"
+#include "../ble/weather_service.h"
+#include "../ble/alarm_service.h"
 
 #if KEPLER_HAS_SHARP_LCD
 
 #include <string.h>
 #include <stdio.h>
 
-/*==========================================================================*
- *  Provisional weather_data_t — REPLACE with Task 6 include               *
- *==========================================================================*/
-
-typedef enum {
-    WEATHER_SUNNY       = 0,
-    WEATHER_PARTLY      = 1,
-    WEATHER_CLOUDY      = 2,
-    WEATHER_RAINY       = 3,
-    WEATHER_HEAVY_RAIN  = 4,
-    WEATHER_THUNDER     = 5,
-    WEATHER_SNOWY       = 6,
-    WEATHER_FOGGY       = 7,
-    WEATHER_UNKNOWN     = 8,
-} weather_condition_t;
-
-struct weather_data_s {
-    weather_condition_t condition;
-    int8_t   temp_c;
-    int8_t   feels_like_c;
-    uint8_t  humidity_pct;
-    uint32_t updated_at;      /* Unix timestamp of last BLE push            */
-    struct {
-        weather_condition_t condition;
-        int8_t  temp_c;
-        uint8_t hour;         /* 0-23                                       */
-    } hourly[6];
-};
+#include <ti/drivers/Seconds.h>
 
 /*==========================================================================*
  *  Layout constants — pixel coordinates from spec                          *
@@ -164,11 +138,14 @@ static bool               s_finder_blink_on;
 static bool               s_banner_active;
 static ui_notification_t  s_banner_notif;
 
-/* Stopwatch placeholder state (wired in Task 5) */
+/* Stopwatch view state (pushed by ui_update_stopwatch) */
 static bool               s_sw_running;
 static uint32_t           s_sw_cs;       /* total centiseconds             */
 static uint8_t            s_sw_laps;     /* lap count                      */
 static uint32_t           s_sw_lap_cs[3];/* last 3 lap times               */
+
+/* Display invert state (BTN_1 long) */
+static bool               s_inverted;
 
 static const char *const  DAY_NAMES[7] = {
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
@@ -177,10 +154,17 @@ static const char *const  MON_NAMES[12] = {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
+/* Indexed by weather_condition_t 0-7; [8] = unknown/out-of-range.        */
 static const char *const  WX_COND_STR[] = {
-    "Sunny", "Pt Cloudy", "Cloudy", "Rainy",
-    "Heavy Rain", "Thunder", "Snowy", "Foggy", "---"
+    "Clear", "Pt Cloudy", "Cloudy", "Rain",
+    "Storm", "Snow", "Fog", "Windy", "---"
 };
+
+/* Clamp a wire condition byte to a WX_COND_STR / icon table index.        */
+static uint8_t wx_idx(uint8_t condition)
+{
+    return (condition < 8u) ? condition : 8u;
+}
 
 /*==========================================================================*
  *  Internal forward declarations                                           *
@@ -272,6 +256,34 @@ static void draw_wx_stub_32(uint8_t px, uint8_t py)
     font_draw_string(s_fb, px + 12u, py + 12u, "?", false);
 }
 
+/* Real condition icons (weather_icons.c); unknown -> stub box.            */
+static void draw_wx_icon_16(uint8_t cond, uint8_t px, uint8_t py)
+{
+    if (cond < 8u) {
+        fb_draw_glyph(s_fb, weather_icon_md[cond], 16u, 16u, px, py, false);
+    } else {
+        draw_wx_stub_16(px, py);
+    }
+}
+
+static void draw_wx_icon_32(uint8_t cond, uint8_t px, uint8_t py)
+{
+    if (cond < 8u) {
+        fb_draw_glyph(s_fb, weather_icon_lg[cond], 32u, 32u, px, py, false);
+    } else {
+        draw_wx_stub_32(px, py);
+    }
+}
+
+static void draw_wx_icon_12(uint8_t cond, uint8_t px, uint8_t py)
+{
+    if (cond < 8u) {
+        fb_draw_glyph(s_fb, weather_icon_sm[cond], 12u, 12u, px, py, false);
+    } else {
+        draw_wx_stub_16(px, py);
+    }
+}
+
 /* Step progress bar at the fixed MAIN screen position. */
 static void draw_progress_bar(uint8_t pct)
 {
@@ -348,13 +360,17 @@ static void render_screen_main(void)
 
     /* --- Weather summary (16x16 icon + temp + condition) -------------- */
     uint8_t wx_x = 4u;
-    draw_wx_stub_16(wx_x, MAIN_WX_Y);   /* TODO Task 6: real icon        */
+    if (s_weather != NULL) {
+        draw_wx_icon_16(s_weather->condition, wx_x, MAIN_WX_Y);
+    } else {
+        draw_wx_stub_16(wx_x, MAIN_WX_Y);
+    }
     wx_x += 20u;
 
     if (s_weather != NULL) {
-        snprintf(buf, sizeof(buf), "%dC  %s",
-                 s_weather->temp_c,
-                 WX_COND_STR[s_weather->condition]);
+        snprintf(buf, sizeof(buf), "%d%c  %s",
+                 s_weather->temp, s_weather->unit,
+                 WX_COND_STR[wx_idx(s_weather->condition)]);
     } else {
         snprintf(buf, sizeof(buf), "--C  No data");
     }
@@ -416,16 +432,16 @@ static void render_screen_weather(void)
 
     /* --- Large icon + current temperature ----------------------------- */
     uint8_t icon_x = (SHARP_LCD_WIDTH / 2u) - 40u;
-    draw_wx_stub_32(icon_x, WX_ICON_Y);   /* TODO Task 6: real icon       */
+    draw_wx_icon_32(s_weather->condition, icon_x, WX_ICON_Y);
 
-    snprintf(buf, sizeof(buf), "%dC", s_weather->temp_c);
+    snprintf(buf, sizeof(buf), "%d%c", s_weather->temp, s_weather->unit);
     font_draw_string(s_fb, icon_x + 36u, WX_ICON_Y + 12u, buf, false);
 
     /* --- Condition + feels-like + humidity ---------------------------- */
     draw_separator(WX_SEP_Y - 2u);
-    snprintf(buf, sizeof(buf), "%s  Fl:%dC  H:%u%%",
-             WX_COND_STR[s_weather->condition],
-             s_weather->feels_like_c,
+    snprintf(buf, sizeof(buf), "%s  Fl:%d%c  H:%u%%",
+             WX_COND_STR[wx_idx(s_weather->condition)],
+             s_weather->feels_like, s_weather->unit,
              s_weather->humidity_pct);
     font_draw_string(s_fb, 2u, WX_DETAIL_Y, buf, false);
     draw_separator(WX_SEP_Y);
@@ -441,12 +457,29 @@ static void render_screen_weather(void)
             font_draw_string(s_fb, cx + 4u, WX_HOURLY_HDR_Y, buf, false);
         }
 
-        draw_wx_stub_16(cx + 4u, WX_HOURLY_ICON_Y);   /* TODO Task 6     */
+        uint8_t cond = (col == 0u) ? s_weather->condition
+                                   : s_weather->hourly[col].condition;
+        draw_wx_icon_12(cond, cx + 4u, WX_HOURLY_ICON_Y);
 
-        int8_t t = (col == 0u) ? s_weather->temp_c
-                               : s_weather->hourly[col].temp_c;
+        int8_t t = (col == 0u) ? s_weather->temp
+                               : s_weather->hourly[col].temp;
         snprintf(buf, sizeof(buf), "%d", t);
         font_draw_string(s_fb, cx + 4u, WX_HOURLY_TEMP_Y, buf, false);
+    }
+
+    /* --- Footer: data age ---------------------------------------------- */
+    {
+        uint16_t age = weather_service_age_min();
+        if (age == 0xFFFFu) {
+            snprintf(buf, sizeof(buf), "Updated: --");
+        } else if (age < 60u) {
+            snprintf(buf, sizeof(buf), "Updated %u min ago", age);
+        } else {
+            snprintf(buf, sizeof(buf), "Updated %u h ago", age / 60u);
+        }
+        font_draw_string(s_fb, 2u,
+                         (uint8_t)(SHARP_LCD_HEIGHT - FONT_SMALL_H - 2u),
+                         buf, false);
     }
 }
 
@@ -507,8 +540,21 @@ static void render_screen_notifications(void)
 
     draw_separator(NOTIF_SEP2_Y);
 
-    /* --- Relative time placeholder (full timestamp formatting Task 5) - */
-    font_draw_string(s_fb, 2u, NOTIF_AGE_Y, "-- min ago", false);
+    /* --- Relative age from the notification timestamp ----------------- */
+    {
+        uint32_t now = Seconds_get();
+        uint32_t age = (now > n->timestamp) ? (now - n->timestamp) : 0u;
+        if (age < 60u) {
+            snprintf(buf, sizeof(buf), "just now");
+        } else if (age < 3600u) {
+            snprintf(buf, sizeof(buf), "%lu min ago",
+                     (unsigned long)(age / 60u));
+        } else {
+            snprintf(buf, sizeof(buf), "%lu h ago",
+                     (unsigned long)(age / 3600u));
+        }
+        font_draw_string(s_fb, 2u, NOTIF_AGE_Y, buf, false);
+    }
 
     draw_separator(NOTIF_SEP3_Y);
 
@@ -662,9 +708,34 @@ static void render_screen_alarms(void)
     }
     draw_separator(AL_SEP_Y);
 
-    /* --- Alarm list placeholder (Task 5/6 provides alarm_list_t) ------ */
-    font_draw_string(s_fb, 6u, AL_ITEM_Y, "No alarms synced", false);
-    font_draw_string(s_fb, 6u, AL_ITEM_Y + AL_ITEM_H, "Connect phone app", false);
+    /* --- Alarm list (synced via 0xFF08, read from alarm_service) ------ */
+    if (g_alarms.count == 0u) {
+        font_draw_string(s_fb, 6u, AL_ITEM_Y, "No alarms synced", false);
+        font_draw_string(s_fb, 6u, AL_ITEM_Y + AL_ITEM_H,
+                         "Set alarms in app", false);
+    } else {
+        char    buf[32];
+        uint8_t selected  = alarms_get_selected();
+        uint8_t triggered = alarms_get_triggered();
+
+        for (uint8_t i = 0u; i < g_alarms.count; i++) {
+            const alarm_entry_t *a  = &g_alarms.alarms[i];
+            uint8_t              iy = (uint8_t)(AL_ITEM_Y + i * AL_ITEM_H);
+            bool                 inv = (i == selected);
+
+            snprintf(buf, sizeof(buf), "%c%02u:%02u %-8s [%s]",
+                     (i == triggered) ? '!' :
+                     (a->enabled ? '*' : 'o'),
+                     a->hour, a->minute, a->label,
+                     a->enabled ? "ON" : "OFF");
+
+            if (inv) {
+                fb_fill_rect(s_fb, 0u, iy - 1u,
+                             SHARP_LCD_WIDTH, FONT_SMALL_H + 2u, true);
+            }
+            font_draw_string(s_fb, 6u, iy, buf, inv);
+        }
+    }
 
     draw_separator(AL_TIMER_SEP_Y);
 
@@ -713,6 +784,7 @@ void ui_init(void)
     s_sw_running    = false;
     s_sw_cs         = 0u;
     s_sw_laps       = 0u;
+    s_inverted      = false;
 
     memset(&s_time, 0, sizeof(s_time));
     memset(s_notif, 0, sizeof(s_notif));
@@ -869,13 +941,17 @@ void ui_update_weather(const weather_data_t *w)
         fb_fill_rect(s_fb, 0u, MAIN_WX_Y,
                      SHARP_LCD_WIDTH, MAIN_SEP3_Y - MAIN_WX_Y, false);
         uint8_t wx_x = 4u;
-        draw_wx_stub_16(wx_x, MAIN_WX_Y);
+        if (s_weather != NULL) {
+            draw_wx_icon_16(s_weather->condition, wx_x, MAIN_WX_Y);
+        } else {
+            draw_wx_stub_16(wx_x, MAIN_WX_Y);
+        }
         wx_x += 20u;
         char buf[32];
         if (s_weather != NULL) {
-            snprintf(buf, sizeof(buf), "%dC  %s",
-                     s_weather->temp_c,
-                     WX_COND_STR[s_weather->condition]);
+            snprintf(buf, sizeof(buf), "%d%c  %s",
+                     s_weather->temp, s_weather->unit,
+                     WX_COND_STR[wx_idx(s_weather->condition)]);
         } else {
             snprintf(buf, sizeof(buf), "--C  No data");
         }
@@ -931,6 +1007,26 @@ void ui_scroll_notifications(int8_t delta)
     }
 }
 
+void ui_dismiss_selected_notification(void)
+{
+    if (s_notif_count == 0u) return;
+
+    /* Shift everything after the selected entry one slot left.            */
+    for (uint8_t i = s_notif_idx; i + 1u < s_notif_count; i++) {
+        s_notif[i] = s_notif[i + 1u];
+    }
+    s_notif_count--;
+    if (s_notif_idx >= s_notif_count && s_notif_idx > 0u) {
+        s_notif_idx--;
+    }
+
+    if (s_screen == UI_SCREEN_NOTIFICATIONS) {
+        render_screen_notifications();
+    } else if (s_screen == UI_SCREEN_MAIN) {
+        render_screen_main();   /* badge count changed                     */
+    }
+}
+
 uint8_t ui_notif_count(void)
 {
     return s_notif_count;
@@ -967,6 +1063,56 @@ void ui_finder_blink_tick(void)
                              LOC_PROMPT_Y, msg, false);
         }
     }
+}
+
+/*==========================================================================*
+ *  Public API — stopwatch / alarms (Task 6 wiring)                         *
+ *==========================================================================*/
+
+void ui_update_stopwatch(uint32_t elapsed_cs, bool running,
+                         const uint32_t *laps, uint8_t lap_count)
+{
+    s_sw_cs      = elapsed_cs;
+    s_sw_running = running;
+    s_sw_laps    = lap_count;
+
+    memset(s_sw_lap_cs, 0, sizeof(s_sw_lap_cs));
+    if (laps != NULL) {
+        uint8_t n = (lap_count < 3u) ? lap_count : 3u;
+        for (uint8_t i = 0u; i < n; i++) {
+            s_sw_lap_cs[i] = laps[i];
+        }
+    }
+
+    if (s_screen == UI_SCREEN_STOPWATCH) {
+        render_screen_stopwatch();
+    }
+}
+
+void ui_update_alarms(void)
+{
+    if (s_screen == UI_SCREEN_ALARMS) {
+        render_screen_alarms();
+    }
+}
+
+/*==========================================================================*
+ *  Public API — display invert                                             *
+ *==========================================================================*/
+
+void ui_apply_invert(bool invert)
+{
+    if (invert == s_inverted) { return; }   /* idempotent                  */
+    s_inverted = invert;
+
+    /* XOR every framebuffer byte — flips all pixels, fully reversible.    */
+    for (uint8_t y = 0u; y < SHARP_LCD_HEIGHT; y++) {
+        for (uint8_t b = 0u; b < SHARP_LCD_STRIDE; b++) {
+            s_fb[y][b] ^= 0xFFu;
+        }
+        sharp_lcd_mark_dirty(y);
+    }
+    sharp_lcd_flush_dirty(s_fb);
 }
 
 /*==========================================================================*
