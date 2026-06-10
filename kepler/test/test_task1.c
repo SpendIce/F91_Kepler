@@ -12,10 +12,19 @@
  *              -I kepler/test/stubs \
  *              -DKEPLER_HAS_SHARP_LCD=1 \
  *              kepler/test/test_task1.c \
+ *              kepler/test/stubs/mocks.c \
  *              kepler/display/sharp_lcd.c \
  *              kepler/display/ui_renderer.c \
  *              kepler/display/fonts.c \
+ *              kepler/display/weather_icons.c \
+ *              kepler/ble/weather_service.c \
+ *              kepler/ble/alarm_service.c \
+ *              kepler/ble/ble_manager.c \
+ *              kepler/storage/flash_store.c \
+ *              kepler/power/event_queue.c \
  *              -o kepler/test/test_task1 && ./kepler/test/test_task1
+ *
+ *        (Dependency list grew with the Task 6 renderer wiring.)
  *
  *****************************************************************************/
 
@@ -39,6 +48,7 @@ uint16_t        mock_spi_len;
 int             mock_spi_call_count;
 mock_pin_event_t mock_pin_log[MOCK_PIN_LOG_SIZE];
 int             mock_pin_log_count;
+uint32_t        mock_seconds_value;   /* ui_renderer ages notifs (Task 6) */
 
 void mock_spi_reset(void) {
     mock_spi_len = 0;

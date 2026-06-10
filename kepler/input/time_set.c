@@ -13,6 +13,11 @@
  *
  *****************************************************************************/
 
+/* gmtime_r needs POSIX visibility when compiled with host glibc.          */
+#if !defined(__TI_COMPILER_VERSION__) && !defined(_POSIX_C_SOURCE)
+#define _POSIX_C_SOURCE 200112L
+#endif
+
 #include "time_set.h"
 #include "../kepler_config.h"
 #include "../display/ui_renderer.h"
