@@ -101,6 +101,7 @@
 #define KEPLER_ST25DV_GPO_PIN       IOID_UNUSED   /* NFC tag GPO interrupt        */
 #define KEPLER_INDUCTIVE_CHG_PIN    IOID_UNUSED   /* Inductive charge detection   */
 #define KEPLER_BUZZER_PWM_PIN       IOID_UNUSED   /* Piezo buzzer PWM output      */
+#define KEPLER_BUZZER_PWM_INDEX     0             /* TI PWM driver instance       */
 
 /*==========================================================================*
  *  HARDWARE FEATURE FLAGS                                                  *
@@ -109,12 +110,30 @@
  *  Code must compile cleanly with any flag set to 0.                      *
  *==========================================================================*/
 
+/* All flags are #ifndef-guarded so host test builds (and CCS build       *
+ * configurations) can force a flag with -DKEPLER_HAS_xxx=1.              */
+#ifndef KEPLER_HAS_SHARP_LCD
 #define KEPLER_HAS_SHARP_LCD        1   /* Always 1 from Phase 0 onward     */
+#endif
+#ifndef KEPLER_HAS_BUTTONS
 #define KEPLER_HAS_BUTTONS          1   /* Always 1 — buttons on all hardware */
+#endif
+#ifndef KEPLER_HAS_DRV2605L
 #define KEPLER_HAS_DRV2605L         0   /* Enable when haptic motor present */
+#endif
+#ifndef KEPLER_HAS_LIS2DW12
 #define KEPLER_HAS_LIS2DW12         0   /* Enable when accelerometer present*/
+#endif
+#ifndef KEPLER_HAS_ST25DV
 #define KEPLER_HAS_ST25DV           0   /* Enable when NFC tag present      */
+#endif
+#ifndef KEPLER_HAS_INDUCTIVE_CHG
 #define KEPLER_HAS_INDUCTIVE_CHG    0   /* Enable when charge coil present  */
+#endif
+#ifndef KEPLER_HAS_BUZZER
+#define KEPLER_HAS_BUZZER           0   /* Enable once the v1 buzzer trace  *
+                                         * is verified and the PWM pin set  */
+#endif
 
 /* Derived feature flags — auto-enable when parent hardware is present     */
 #define KEPLER_STEP_COUNTER         (KEPLER_HAS_LIS2DW12)
