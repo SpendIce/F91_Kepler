@@ -33,6 +33,12 @@ typedef enum {
 /* Construct the three Clock objects.  Must be called once before use.     */
 void time_set_init(void);
 
+/* Register an optional Swi-safe wake hook fired whenever a timer flag     *
+ * becomes pending — the main task uses it to schedule a                   *
+ * time_set_process() call (Task 5 integration).  NULL disables.           */
+typedef void (*time_set_wake_cb_t)(void);
+void time_set_set_wake_cb(time_set_wake_cb_t hook);
+
 /* Handle a button event.  Returns true if the event was consumed by the   *
  * time-set state machine and should NOT be processed further.             *
  * Returns false when state is TS_NORMAL and the event is not BTN_2 LONG. */

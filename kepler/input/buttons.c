@@ -24,6 +24,8 @@
 
 #if KEPLER_HAS_BUTTONS
 
+#include <stddef.h>
+
 #include <ti/drivers/PIN.h>
 #include <ti/sysbios/knl/Clock.h>
 
@@ -54,6 +56,8 @@ static ring_entry_t     s_ring[RING_SIZE];
 static volatile uint8_t s_ring_head;   /* written by Swi  */
 static volatile uint8_t s_ring_tail;   /* read by task    */
 
+static buttons_wake_cb_t s_wake_cb;    /* wakes the consumer task          */
+
 static void ring_push(button_id_t id, button_event_t evt)
 {
     uint8_t next = (uint8_t)((s_ring_head + 1u) & RING_MASK);
@@ -61,6 +65,9 @@ static void ring_push(button_id_t id, button_event_t evt)
         s_ring[s_ring_head].id  = id;
         s_ring[s_ring_head].evt = evt;
         s_ring_head             = next;
+        if (s_wake_cb != NULL) {
+            s_wake_cb();
+        }
     }
     /* else: overflow — silently drop newest, oldest preserved */
 }
@@ -198,6 +205,11 @@ void buttons_init(button_cb_t callback)
     }
 }
 
+void buttons_set_wake_cb(buttons_wake_cb_t hook)
+{
+    s_wake_cb = hook;
+}
+
 uint8_t buttons_process(void)
 {
     uint8_t count = 0u;
@@ -239,6 +251,7 @@ void buttons_test_fire_long(button_id_t btn)
 #else /* !KEPLER_HAS_BUTTONS */
 
 void    buttons_init(button_cb_t cb)    { (void)cb; }
+void    buttons_set_wake_cb(buttons_wake_cb_t h) { (void)h; }
 uint8_t buttons_process(void)           { return 0u; }
 bool    buttons_is_pressed(button_id_t b) { (void)b; return false; }
 

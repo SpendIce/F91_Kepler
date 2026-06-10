@@ -22,6 +22,7 @@
 
 #include <time.h>
 #include <string.h>
+#include <stddef.h>
 
 /*--- Timing helpers (ms → RTOS ticks) -----------------------------------*/
 #define MS_TO_TICKS(ms)  ((uint32_t)(ms) * 1000u / Clock_tickPeriod)
@@ -37,6 +38,15 @@ static volatile bool     s_blink_dirty;
 static volatile bool     s_timeout_fired;
 static volatile bool     s_confirm_done;
 
+/* Optional Swi-safe wake hook so the main task knows to call             *
+ * time_set_process() (Task 5 integration).                               */
+static time_set_wake_cb_t s_wake_cb;
+
+static void wake_main(void)
+{
+    if (s_wake_cb != NULL) { s_wake_cb(); }
+}
+
 /*--- Clocks --------------------------------------------------------------*/
 static Clock_Struct s_blink_clk;    /* periodic, KEPLER_TIME_SET_BLINK_MS   */
 static Clock_Struct s_timeout_clk;  /* one-shot, KEPLER_TIME_SET_TIMEOUT_MS */
@@ -51,18 +61,21 @@ static void blink_swi(UArg arg)
     (void)arg;
     s_blink_on    = !s_blink_on;
     s_blink_dirty = true;
+    wake_main();
 }
 
 static void timeout_swi(UArg arg)
 {
     (void)arg;
     s_timeout_fired = true;
+    wake_main();
 }
 
 static void confirm_swi(UArg arg)
 {
     (void)arg;
     s_confirm_done = true;
+    wake_main();
 }
 
 /*==========================================================================*
@@ -154,6 +167,11 @@ static void cancel_time_set(void)
 /*==========================================================================*
  *  Public API                                                               *
  *==========================================================================*/
+
+void time_set_set_wake_cb(time_set_wake_cb_t hook)
+{
+    s_wake_cb = hook;
+}
 
 void time_set_init(void)
 {

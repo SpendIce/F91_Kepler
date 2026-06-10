@@ -46,6 +46,12 @@ typedef void (*button_cb_t)(button_id_t btn, button_event_t evt);
  * callback.  Must be called once at startup.                               */
 void buttons_init(button_cb_t callback);
 
+/* Register an optional wake hook, invoked from Swi context whenever a new  *
+ * event lands in the ring.  The hook must be Swi-safe (post-only); the    *
+ * main task uses it to schedule a buttons_process() call.  NULL disables. */
+typedef void (*buttons_wake_cb_t)(void);
+void buttons_set_wake_cb(buttons_wake_cb_t hook);
+
 /* Drain the ring buffer and invoke the callback for each queued event.     *
  * Call from the main application task (not from an ISR or Swi).           *
  * Returns the number of events dispatched (0 if ring was empty).          */
