@@ -11,12 +11,23 @@
  *              -DKEPLER_HAS_BUTTONS=1 \
  *              -DKEPLER_TEST_ONLY \
  *              kepler/test/test_task2.c \
+ *              kepler/test/stubs/mocks.c \
  *              kepler/input/buttons.c \
  *              kepler/input/time_set.c \
  *              kepler/display/sharp_lcd.c \
  *              kepler/display/ui_renderer.c \
  *              kepler/display/fonts.c \
+ *              kepler/display/weather_icons.c \
+ *              kepler/ble/weather_service.c \
+ *              kepler/ble/alarm_service.c \
+ *              kepler/ble/ble_manager.c \
+ *              kepler/storage/flash_store.c \
+ *              kepler/power/event_queue.c \
  *              -o kepler/test/test_task2 && ./kepler/test/test_task2
+ *
+ *        NOTE: the dependency list grew in Task 6 (ui_renderer now pulls
+ *        weather/alarm services).  The committed test_task2 binary
+ *        predates that change — rebuild before trusting it.
  *
  *****************************************************************************/
 
