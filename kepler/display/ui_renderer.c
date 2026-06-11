@@ -35,7 +35,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <ti/drivers/Seconds.h>
+#include <ti/sysbios/hal/Seconds.h>
 
 /*==========================================================================*
  *  Layout constants — pixel coordinates from spec                          *

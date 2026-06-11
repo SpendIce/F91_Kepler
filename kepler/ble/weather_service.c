@@ -18,7 +18,7 @@
 #include "../storage/flash_store.h"
 #include "../display/ui_renderer.h"
 
-#include <ti/drivers/Seconds.h>
+#include <ti/sysbios/hal/Seconds.h>
 
 /*--- Global wire-format state (spec 06) ------------------------------------*/
 

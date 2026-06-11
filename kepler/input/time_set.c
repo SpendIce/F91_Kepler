@@ -23,7 +23,7 @@
 #include "../display/ui_renderer.h"
 
 #include <ti/sysbios/knl/Clock.h>
-#include <ti/drivers/Seconds.h>
+#include <ti/sysbios/hal/Seconds.h>
 
 #include <time.h>
 #include <string.h>

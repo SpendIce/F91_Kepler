@@ -49,7 +49,7 @@
 #include <time.h>
 
 #include <ti/sysbios/knl/Clock.h>
-#include <ti/drivers/Seconds.h>
+#include <ti/sysbios/hal/Seconds.h>
 
 #define MS_TO_TICKS(ms)  ((uint32_t)(ms) * 1000u / Clock_tickPeriod)
 

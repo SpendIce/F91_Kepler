@@ -26,7 +26,7 @@
 #include "../storage/flash_store.h"
 #include "../accel/actigraphy.h"
 
-#include <ti/drivers/Seconds.h>
+#include <ti/sysbios/hal/Seconds.h>
 
 /*--- Slot pool ----------------------------------------------------------------*/
 

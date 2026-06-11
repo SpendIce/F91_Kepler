@@ -16,7 +16,7 @@
 #include <stddef.h>
 #include <string.h>
 
-#include <ti/drivers/Seconds.h>
+#include <ti/sysbios/hal/Seconds.h>
 
 /*--- Sleep window state (kept live even without the accelerometer) --------*/
 

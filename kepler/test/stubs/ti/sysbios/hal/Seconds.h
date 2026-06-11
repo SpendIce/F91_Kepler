@@ -2,7 +2,7 @@
 #define STUB_SECONDS_H
 
 #include <stdint.h>
-#include "../../mock_state.h"
+#include "../../../mock_state.h"
 
 /* TI SDK Seconds module — backed by mock_seconds_value for host tests.   */
 
