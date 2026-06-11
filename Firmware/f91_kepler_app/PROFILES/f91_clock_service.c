@@ -43,7 +43,7 @@
 #include <ti/display/Display.h>
 
 #include "bcomdef.h"
-#include "OSAL.h"
+#include "osal.h"
 #include "linkdb.h"
 #include "att.h"
 #include "gatt.h"

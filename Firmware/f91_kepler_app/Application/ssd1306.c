@@ -31,7 +31,7 @@
 #include <ti/drivers/I2C.h>
 #include <ti/sysbios/BIOS.h>
 
-#include "Board.h"
+#include "board.h"
 
 
 /*********************************************************************

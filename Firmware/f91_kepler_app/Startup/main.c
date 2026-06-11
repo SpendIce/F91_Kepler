@@ -64,7 +64,7 @@
 #include <ti/sysbios/knl/Mailbox.h>
 #include <ti/display/Display.h>
 
-#include "Board.h"
+#include "board.h"
 
 #include <icall.h>
 #include "hal_assert.h"
