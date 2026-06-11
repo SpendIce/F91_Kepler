@@ -49,6 +49,7 @@
 									<listOptionValue builtIn="false" value="${PROJECT_LOC}/Startup"/>
 									<listOptionValue builtIn="false" value="${PROJECT_LOC}/PROFILES"/>
 									<listOptionValue builtIn="false" value="${PROJECT_LOC}/Include"/>
+<listOptionValue builtIn="false" value="${PROJECT_LOC}/../.."/>
 									<listOptionValue builtIn="false" value="${SRC_BLE_DIR}/controller/cc26xx_r2/inc"/>
 									<listOptionValue builtIn="false" value="${SRC_BLE_DIR}/inc"/>
 									<listOptionValue builtIn="false" value="${SRC_BLE_DIR}/rom"/>
@@ -89,6 +90,8 @@
 									<listOptionValue builtIn="false" value="${COM_TI_SIMPLELINK_CC2640R2_SDK_SYMBOLS}"/>
 									<listOptionValue builtIn="false" value="DeviceFamily_CC26X0R2"/>
 									<listOptionValue builtIn="false" value="BOARD_DISPLAY_USE_LCD=0"/>
+<listOptionValue builtIn="false" value="BOARD_DISPLAY_SHARP_SIZE=16"/>
+<listOptionValue builtIn="false" value="BOARD_DISPLAY_UART_STRBUF_SIZE=32"/>
 									<listOptionValue builtIn="false" value="BOARD_DISPLAY_USE_UART=1"/>
 									<listOptionValue builtIn="false" value="BOARD_DISPLAY_USE_UART_ANSI=1"/>
 									<listOptionValue builtIn="false" value="CC2640R2_LAUNCHXL"/>
@@ -175,7 +178,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="TOOLS/src|TOOLS/cc26xx_app.cmd|Startup/ccfg_app_ble_rcosc.c|Application/rcosc_calibration.h|Application/rcosc_calibration.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="TOOLS/src|TOOLS/cc26xx_app.cmd|Startup/ccfg_app_ble_rcosc.c|Application/rcosc_calibration.h|Application/rcosc_calibration.c|kepler/test|Application/ssd1306.c|Application/f91_buttons.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -230,6 +233,7 @@
 									<listOptionValue builtIn="false" value="${PROJECT_LOC}/Startup"/>
 									<listOptionValue builtIn="false" value="${PROJECT_LOC}/PROFILES"/>
 									<listOptionValue builtIn="false" value="${PROJECT_LOC}/Include"/>
+<listOptionValue builtIn="false" value="${PROJECT_LOC}/../.."/>
 									<listOptionValue builtIn="false" value="${SRC_BLE_DIR}/controller/cc26xx_r2/inc"/>
 									<listOptionValue builtIn="false" value="${SRC_BLE_DIR}/inc"/>
 									<listOptionValue builtIn="false" value="${SRC_BLE_DIR}/rom"/>
@@ -270,6 +274,8 @@
 									<listOptionValue builtIn="false" value="${COM_TI_SIMPLELINK_CC2640R2_SDK_SYMBOLS}"/>
 									<listOptionValue builtIn="false" value="DeviceFamily_CC26X0R2"/>
 									<listOptionValue builtIn="false" value="BOARD_DISPLAY_USE_LCD=0"/>
+<listOptionValue builtIn="false" value="BOARD_DISPLAY_SHARP_SIZE=16"/>
+<listOptionValue builtIn="false" value="BOARD_DISPLAY_UART_STRBUF_SIZE=32"/>
 									<listOptionValue builtIn="false" value="BOARD_DISPLAY_USE_UART=1"/>
 									<listOptionValue builtIn="false" value="BOARD_DISPLAY_USE_UART_ANSI=1"/>
 									<listOptionValue builtIn="false" value="CC2640R2_LAUNCHXL"/>
@@ -355,7 +361,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="TOOLS/src|TOOLS/cc26xx_app.cmd|Startup/ccfg_app_ble.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="TOOLS/src|TOOLS/cc26xx_app.cmd|Startup/ccfg_app_ble.c|kepler/test|Application/ssd1306.c|Application/f91_buttons.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

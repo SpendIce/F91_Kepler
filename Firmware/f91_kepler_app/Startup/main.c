@@ -154,6 +154,9 @@ PIN_Handle radCtrlHandle;
  */
 extern void AssertHandler(uint8 assertCause, uint8 assertSubcause);
 
+/* kepler_task.c — TI-RTOS wrapper for the new kepler/ event loop */
+extern void KeplerMain_createTask(void);
+
 /*******************************************************************************
  * @fn          Main
  *
@@ -255,6 +258,9 @@ int main()
 
   /* Kick off main smart watch application - Priority 1 */
   F91Kepler_createTask();
+
+  /* Kick off the new kepler/ event-loop task (Phase 0 rewrite) - Priority 1 */
+  KeplerMain_createTask();
 
   /* enable interrupts and start SYS/BIOS */
   BIOS_start();

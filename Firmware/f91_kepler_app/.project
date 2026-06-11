@@ -183,6 +183,11 @@
 			<type>1</type>
 			<locationURI>SRC_BLE_DIR/hal/src/target/_common/TRNGCC26XX.h</locationURI>
 		</link>
+		<link>
+			<name>kepler</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/kepler</locationURI>
+		</link>
 	</linkedResources>
 	<variableList>
 		<variable>
