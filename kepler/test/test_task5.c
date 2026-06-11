@@ -82,13 +82,14 @@ static void test_event_queue(void)
     CHECK(event_queue_pend(&msg, 0u) && msg.type == EVT_BUTTON_2_SHORT
           && msg.param == 22u, "FIFO order: second out");
 
-    /* Overflow: 15 fit (head==tail-1 means full), 16th drops              */
+    /* Overflow: size-1 fit (head==tail-1 means full), rest drop           */
     for (uint32_t i = 0u; i < 20u; i++) {
         event_queue_post(EVT_STEP_UPDATE, i, NULL);
     }
     CHECK(event_queue_depth() == KEPLER_EVENT_QUEUE_SIZE - 1u,
           "ring holds size-1 events");
-    CHECK(event_queue_dropped() == 5u, "drops counted");
+    CHECK(event_queue_dropped() == 20u - (KEPLER_EVENT_QUEUE_SIZE - 1u),
+          "drops counted");
     CHECK(event_queue_pend(&msg, 0u) && msg.param == 0u,
           "oldest preserved on overflow");
 }

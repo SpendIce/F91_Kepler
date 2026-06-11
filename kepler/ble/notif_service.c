@@ -30,7 +30,9 @@
 
 /*--- Slot pool ----------------------------------------------------------------*/
 
-#define NOTIF_SLOTS  4u
+/* 2 in-flight slots: a 500 ms connection interval cannot deliver writes   *
+ * faster than the main task drains them.  (Was 4; halved for R1.)         */
+#define NOTIF_SLOTS  2u
 
 static ui_notification_t s_slots[NOTIF_SLOTS];
 static uint8_t           s_slot_next;

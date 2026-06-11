@@ -103,8 +103,10 @@ typedef struct {
     void          *data;    /* optional pointer (poster-owned storage)     */
 } kepler_event_msg_t;
 
-/*--- Queue depth (power of two) ------------------------------------------*/
-#define KEPLER_EVENT_QUEUE_SIZE  16u
+/*--- Queue depth (power of two).  8 is ample: the consumer drains the     *
+ * whole ring per wakeup and producers are humans + 1 Hz-class timers.     *
+ * (Was 16; halved for the R1 RAM gate.)                                   */
+#define KEPLER_EVENT_QUEUE_SIZE  8u
 
 /*==========================================================================*
  *  Public API                                                               *

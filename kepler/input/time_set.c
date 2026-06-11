@@ -13,13 +13,9 @@
  *
  *****************************************************************************/
 
-/* gmtime_r needs POSIX visibility when compiled with host glibc.          */
-#if !defined(__TI_COMPILER_VERSION__) && !defined(_POSIX_C_SOURCE)
-#define _POSIX_C_SOURCE 200112L
-#endif
-
 #include "time_set.h"
 #include "../kepler_config.h"
+#include "../kepler_time.h"
 #include "../display/ui_renderer.h"
 
 #include <ti/sysbios/knl/Clock.h>
@@ -108,22 +104,14 @@ static void render_blink(void)
 /* Write the working hours/minutes to the RTC (preserves date/seconds=0). */
 static void time_set_apply(void)
 {
-    time_t   current = (time_t)Seconds_get();
-    struct tm t;
-    gmtime_r(&current, &t);
-    t.tm_hour = (int)s_hours;
-    t.tm_min  = (int)s_minutes;
-    t.tm_sec  = 0;
-    time_t new_time = mktime(&t);
-    Seconds_set((uint32_t)new_time);
+    Seconds_set(kepler_epoch_set_hm(Seconds_get(), s_hours, s_minutes));
 }
 
 /* Transition into SET_HOURS: read RTC, reset timers, start editing.      */
 static void enter_time_set(void)
 {
-    time_t   now = (time_t)Seconds_get();
     struct tm t;
-    gmtime_r(&now, &t);
+    kepler_epoch_to_tm(Seconds_get(), &t);
     s_hours   = (uint8_t)t.tm_hour;
     s_minutes = (uint8_t)t.tm_min;
 
@@ -162,9 +150,8 @@ static void cancel_time_set(void)
     s_state = TS_NORMAL;
 
     /* Restore display from actual RTC. */
-    time_t   now = (time_t)Seconds_get();
     struct tm t;
-    gmtime_r(&now, &t);
+    kepler_epoch_to_tm(Seconds_get(), &t);
     ui_update_time(&t);
     ui_flush();
 }
@@ -284,9 +271,8 @@ void time_set_process(void)
         s_state        = TS_NORMAL;
 
         /* Show the newly written RTC time. */
-        time_t   now = (time_t)Seconds_get();
         struct tm t;
-        gmtime_r(&now, &t);
+        kepler_epoch_to_tm(Seconds_get(), &t);
         ui_update_time(&t);
         ui_flush();
         return;

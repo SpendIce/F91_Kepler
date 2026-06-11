@@ -20,6 +20,7 @@
 
 #include "kepler_config.h"
 #include "kepler_types.h"
+#include "kepler_time.h"
 #include "kepler_i2c.h"
 
 #include "display/sharp_lcd.h"
@@ -96,45 +97,13 @@ static void input_wake_hook(void)
 }
 
 /*==========================================================================*
- *  Time helpers (no libc localtime — no TZ database on target)             *
+ *  Time helpers                                                             *
  *==========================================================================*/
-
-/* Civil-date algorithm (Howard Hinnant's civil_from_days).                *
- * Seconds_get() holds local wall-clock time synced from the phone.        */
-static void epoch_to_tm(uint32_t epoch, struct tm *t)
-{
-    uint32_t days = epoch / 86400u;
-    uint32_t rem  = epoch % 86400u;
-
-    memset(t, 0, sizeof(*t));
-    t->tm_hour = (int)(rem / 3600u);
-    t->tm_min  = (int)((rem % 3600u) / 60u);
-    t->tm_sec  = (int)(rem % 60u);
-    t->tm_wday = (int)((days + 4u) % 7u);      /* 1970-01-01 was Thursday  */
-
-    {
-        int64_t  z   = (int64_t)days + 719468;
-        int64_t  era = (z >= 0 ? z : z - 146096) / 146097;
-        uint32_t doe = (uint32_t)(z - era * 146097);
-        uint32_t yoe = (doe - doe / 1460u + doe / 36524u - doe / 146096u)
-                       / 365u;
-        int64_t  y   = (int64_t)yoe + era * 400;
-        uint32_t doy = doe - (365u * yoe + yoe / 4u - yoe / 100u);
-        uint32_t mp  = (5u * doy + 2u) / 153u;
-        uint32_t d   = doy - (153u * mp + 2u) / 5u + 1u;
-        uint32_t m   = mp < 10u ? mp + 3u : mp - 9u;
-
-        if (m <= 2u) { y += 1; }
-        t->tm_year = (int)(y - 1900);
-        t->tm_mon  = (int)(m - 1u);
-        t->tm_mday = (int)d;
-    }
-}
 
 static void refresh_time_display(void)
 {
     struct tm t;
-    epoch_to_tm(Seconds_get(), &t);
+    kepler_epoch_to_tm(Seconds_get(), &t);
     if (!time_set_is_active()) {       /* time-set owns the digits         */
         ui_update_time(&t);
     }
@@ -208,7 +177,7 @@ void kepler_ble_on_disconnected(void)
 static void handle_minute_tick(void)
 {
     struct tm t;
-    epoch_to_tm(Seconds_get(), &t);
+    kepler_epoch_to_tm(Seconds_get(), &t);
 
     refresh_time_display();
     pedometer_poll();

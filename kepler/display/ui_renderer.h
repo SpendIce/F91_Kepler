@@ -37,11 +37,13 @@ typedef enum {
 } ui_screen_t;
 
 /*--- Notification record ------------------------------------------------*/
+/* text[41] matches the 40-char BLE wire limit (notif_payload_t) — the     *
+ * renderer wraps at most 3 x 20 chars, so nothing visible is lost.        */
 typedef struct {
     uint8_t  type;         /* 0=message, 1=call, 2=calendar, 3=other      */
     char     app_name[12]; /* null-terminated, e.g. "WhatsApp"             */
     char     sender[21];   /* null-terminated, max 20 chars                */
-    char     text[61];     /* null-terminated, max 60 chars                */
+    char     text[41];     /* null-terminated, max 40 chars                */
     uint32_t timestamp;    /* Unix timestamp of notification               */
 } ui_notification_t;
 
