@@ -94,10 +94,30 @@ pressing the ceiling.
 6. Add DRV2605L (WSON-6), I2C addr 0x5A; OUTP/OUTN to ERM pads (motor in bracket recess).
 7. Add ST25DV04K (SO-8), I2C 0x53/0x57, GPO to MCU, NFC loop antenna on perimeter.
 8. Keep buzzer drive (verify v1 net + transistor from DipTrace schematic — not recoverable from firmware; v1 had no sound code).
-9. Programming: 5 pogo pads (VCC, GND, SWDIO/TMS, SWCLK/TCK, RESET) rear face.
+9. Programming: **7 pogo pads** rear face — VCC, GND, RESET, SWDIO/TMS,
+   SWCLK/TCK, **UART TX, UART RX**.  Primary flash path is the CC2652R7 ROM
+   serial bootloader (BSL) over UART via a CP2102 dongle (`cc2538-bsl`);
+   CCFG keeps the BSL backdoor bound to a button so sealed watches stay
+   UART-reflashable between OAD-capable firmwares.  SWD pads kept as the
+   debug escape hatch (no debugger purchased up front).
 10. Retain: CC2640R2F RGZ (pending §1), 24 MHz + 32.768 kHz crystals, RF matching + antenna, 3 button nets, I2C pull-ups.
 11. Optional (enables OAD on Option A): SPI NOR flash (e.g. MX25R8035F, 1 MB, ultra-low standby) sharing LCD SPI bus, own CS.
 12. Remove any USB/wired charge remnants.
+13. Assembly strategy (LEAN PATH, decided): **JLCPCB economic assembly**,
+    2 boards populated of 5 fabricated, single-side SMT layout target.
+    **BQ51013B + charge coil populated from day one** (sealed watch needs
+    wireless charging; the coil is PCB copper, near-free).  **ST25DV04K is
+    DNP** — pads routed, hand-populate the SO-8 later if NFC is wanted.
+    Bench charging before sealing via a TP4056 board on the battery pads.
+14. Display sourcing: the panel is the **LS013B7DH03** (1.28") — the DH05
+    (1.3") on many breakouts may not fit the F91W window.  If the rig
+    breakout carries a ZIF-connected DH03, transplant it; otherwise buy
+    the bare panel with the distributor order.
+15. CC2652R7RGZR stock at LCSC fluctuates — fallback **CC2652R1FRGZ**
+    (352 KB flash, OAD still fits, usually stocked, cheaper).
+16. Bracket + dock are 3D prints (college printer; resin preferred for the
+    bracket's thin walls).  The bracket is internal — case, buttons,
+    gasket and caseback stay original Casio.
 
 ## 4. v2 pin map proposal (resolves kepler_config.h Tier 2/3)
 
