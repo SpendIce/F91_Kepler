@@ -106,9 +106,10 @@ pressing the ceiling.
 13. Assembly strategy (LEAN PATH, decided): **JLCPCB economic assembly**,
     2 boards populated of 5 fabricated, single-side SMT layout target.
     **BQ51013B + charge coil populated from day one** (sealed watch needs
-    wireless charging; the coil is PCB copper, near-free).  **ST25DV04K is
-    DNP** — pads routed, hand-populate the SO-8 later if NFC is wanted.
-    Bench charging before sealing via a TP4056 board on the battery pads.
+    wireless charging; the coil is PCB copper, near-free).  **ST25DV04K
+    also populated from day one** (user decision: no hand-soldering later;
+    ~US$2/board).  Bench charging before sealing via a TP4056 board on the
+    battery pads.
 14. Display sourcing: the panel is the **LS013B7DH03** (1.28") — the DH05
     (1.3") on many breakouts may not fit the F91W window.  If the rig
     breakout carries a ZIF-connected DH03, transplant it; otherwise buy
