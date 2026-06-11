@@ -45,11 +45,14 @@ static inline SPI_Handle SPI_open(uint32_t idx, SPI_Params *p) {
     return (SPI_Handle)&s_spi_dummy;
 }
 
+/* Appends each transfer so a multi-chunk flush (CS held high across      *
+ * several SPI_transfer calls) is observable as one contiguous stream.    *
+ * mock_spi_reset() rewinds the buffer.                                    */
 static inline bool SPI_transfer(SPI_Handle h, SPI_Transaction *txn) {
     (void)h;
-    if (txn->txBuf && txn->count <= MOCK_SPI_BUFSIZE) {
-        memcpy(mock_spi_buf, txn->txBuf, txn->count);
-        mock_spi_len = txn->count;
+    if (txn->txBuf && (uint32_t)mock_spi_len + txn->count <= MOCK_SPI_BUFSIZE) {
+        memcpy(mock_spi_buf + mock_spi_len, txn->txBuf, txn->count);
+        mock_spi_len = (uint16_t)(mock_spi_len + txn->count);
     }
     mock_spi_call_count++;
     return true;

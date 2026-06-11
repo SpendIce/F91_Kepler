@@ -50,8 +50,17 @@
 #define CMD_WRITE   0x80u
 #define CMD_CLEAR   0x20u
 
-/* SPI transmit buffer: 1 (cmd) + HEIGHT*(1 addr + STRIDE data) + 2 dummy */
-#define TXBUF_SIZE  (2u + ((uint16_t)SHARP_LCD_HEIGHT * (1u + SHARP_LCD_STRIDE)) + 2u)
+/* SPI transmit staging.  The Sharp protocol allows the frame to be       *
+ * streamed in several SPI transfers as long as CS stays HIGH across the  *
+ * whole sequence, so flushes are chunked through a small line buffer     *
+ * instead of staging the full frame (a full-frame buffer cost 3,196 B    *
+ * of RAM — unaffordable against the 20 KB budget, Plan Maestro R1).     *
+ *                                                                         *
+ * Chunk layout: [cmd (first chunk only)] + N x (addr + STRIDE data),     *
+ * with 2 dummy trailer bytes appended to the final chunk.                 */
+#define LINE_BYTES        (1u + SHARP_LCD_STRIDE)
+#define FLUSH_CHUNK_LINES 8u
+#define TXBUF_SIZE        (1u + FLUSH_CHUNK_LINES * LINE_BYTES + 2u)
 
 /*==========================================================================*
  *  Bit-reverse lookup table                                               *
@@ -131,16 +140,21 @@ static void vcom_clock_cb(UArg arg)
     sharp_lcd_vcom_toggle();
 }
 
-/* Perform one SPI write transaction with manual active-high CS.           */
-static void spi_write(const uint8_t *buf, uint16_t len)
+/* Raw SPI transfer — caller manages CS (used by the chunked flush).       */
+static void spi_xfer(const uint8_t *buf, uint16_t len)
 {
     SPI_Transaction txn;
     txn.count = len;
     txn.txBuf = (void *)buf;
     txn.rxBuf = NULL;
-
-    PIN_setOutputValue(s_pins, SHARP_LCD_CS_PIN, 1);  /* CS HIGH            */
     SPI_transfer(s_spi, &txn);
+}
+
+/* Perform one SPI write transaction with manual active-high CS.           */
+static void spi_write(const uint8_t *buf, uint16_t len)
+{
+    PIN_setOutputValue(s_pins, SHARP_LCD_CS_PIN, 1);  /* CS HIGH            */
+    spi_xfer(buf, len);
     PIN_setOutputValue(s_pins, SHARP_LCD_CS_PIN, 0);  /* CS LOW             */
 }
 
@@ -206,7 +220,13 @@ void sharp_lcd_flush(const sharp_fb_t fb)
 void sharp_lcd_flush_lines(const sharp_fb_t fb,
                            uint8_t first_line, uint8_t last_line)
 {
-    uint16_t idx = 0;
+    uint16_t idx    = 0;
+    uint8_t  staged = 0;
+
+    /* CS stays HIGH across the whole multi-chunk sequence — the Sharp     *
+     * protocol only latches on CS falling edge, so chunk boundaries are   *
+     * invisible to the panel.                                             */
+    PIN_setOutputValue(s_pins, SHARP_LCD_CS_PIN, 1);
 
     s_txbuf[idx++] = CMD_WRITE;
 
@@ -220,12 +240,19 @@ void sharp_lcd_flush_lines(const sharp_fb_t fb,
         for (uint8_t b = 0; b < SHARP_LCD_STRIDE; b++) {
             s_txbuf[idx++] = s_reverse[row[b]];
         }
+
+        if (++staged == FLUSH_CHUNK_LINES) {
+            spi_xfer(s_txbuf, idx);
+            idx    = 0;
+            staged = 0;
+        }
     }
 
     s_txbuf[idx++] = 0x00;   /* trailing dummy bytes                      */
     s_txbuf[idx++] = 0x00;
+    spi_xfer(s_txbuf, idx);
 
-    spi_write(s_txbuf, idx);
+    PIN_setOutputValue(s_pins, SHARP_LCD_CS_PIN, 0);
 }
 
 void sharp_lcd_flush_dirty(const sharp_fb_t fb)

@@ -187,7 +187,10 @@
  *  NOTIFICATION RING BUFFER                                               *
  *==========================================================================*/
 
-#define KEPLER_NOTIF_RING_SIZE              10     /* Max stored in RAM                      */
+/* 5 entries (~100 B each).  Plan Maestro R1 names this ring the first    *
+ * RAM recorte; baseline .map showed only ~6 KB free, so the cut is       *
+ * taken up front.  5 is still plenty for a watch.                        */
+#define KEPLER_NOTIF_RING_SIZE              5      /* Max stored in RAM   */
 
 /*==========================================================================*
  *  WEATHER                                                                *
