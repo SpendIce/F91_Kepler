@@ -41,6 +41,28 @@ If the final image clears the 110 KB gate with the full feature set enabled,
 Option A ships sooner. Option B is the right call if NFC/OAD/app growth keeps
 pressing the ceiling.
 
+> **DECIDED (2026-06-11): Option B — CC2652R7.**  Consequences:
+>
+> - **OAD returns to scope** with **internal-flash dual image** (704 KB
+>   leaves ~300 KB per slot after the BLE5 stack) — item 13 of §3 (external
+>   SPI NOR) becomes optional again, keep the pads only if a second use
+>   appears.
+> - Firmware target: SimpleLink CC13xx/CC26xx SDK 7.x + BLE5-Stack +
+>   SysConfig.  Port notes: the PIN driver is gone (GPIO driver replaces
+>   it) → buttons.c / sharp_lcd.c / wrist_raise.c pin code needs a shim;
+>   I2C/SPI/PWM/Clock/Task/Semaphore APIs carry over; flash_store moves to
+>   NVS (or BLE5 SNV).  Host test suites are SDK-agnostic and carry over
+>   unchanged.
+> - The legacy CC2640R2 app is now a **reference only** — no further
+>   migration work on its FA35xxxx GATT layer.  The 0xFFFF service is
+>   implemented fresh on an SDK 7.x `basic_ble` example and the kepler/
+>   modules mount onto it.
+> - Bring-up board: **LP-CC2652R7** LaunchPad.
+> - RF: CC2652R7 reference matching/balun network differs from CC2640R2F —
+>   copy from the LP-CC2652R7 reference design, do not reuse v1's network
+>   blindly.  Supply/decoupling deltas per TI's CC2640R2F→CC26x2 migration
+>   note (DCDC inductor, VDDR caps).
+
 ## 2. Firmware size gate (R1/R2) — measured state
 
 - Baseline (original app + BLE stack, FlashROM_StackLibrary): flash 82.0 KB /
