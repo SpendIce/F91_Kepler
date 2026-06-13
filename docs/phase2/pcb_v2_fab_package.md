@@ -6,7 +6,16 @@
 > remaining human EDA work.
 >
 > Status: firmware gate **passed** (Fase 0 complete, host-tested, size-gated).
-> Layout **does not exist yet** — see §8.
+> **Schematic captured + ERC clean** (2026-06-13) in `Hardware/v2/` (KiCad 10) —
+> see `v2_schematic_verification.md` (pin-by-pin + LCSC parts) and
+> `v2_reference_circuits.md` (datasheet values). A `.kicad_pcb` with all
+> footprints placed + full netlist is generated; **layout/routing is the
+> remaining human GUI work** — see `v2_pcb_layout_guide.md` and §8.
+>
+> **Charger correction:** the receiver is the **BQ51050B** (Qi rx *with*
+> integrated Li-Ion charger), NOT the BQ51013B named in earlier sections below.
+> BQ51013B is a 5 V rx-only part with no charger and would have needed a
+> separate charge IC. References to BQ51013B in §3/§5 are superseded.
 
 ---
 
