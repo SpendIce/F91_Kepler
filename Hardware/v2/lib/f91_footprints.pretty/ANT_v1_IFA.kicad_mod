@@ -1,0 +1,75 @@
+(footprint "ANT_v1_IFA"
+	(version 20260206)
+	(generator "f91-custom")
+	(layer "F.Cu")
+	(descr "2.4GHz PCB inverted-F antenna feed point. Single SMD pad (pad 1) = RF feed. Antenna copper geometry is drawn directly in the PCB layout (not in this footprint). Place this footprint at the feed point junction of the IFA stub, then draw the keepout zone and antenna copper traces in the PCB editor. IFA geometry must be tuned for the specific PCB stackup and ground plane extent.")
+	(tags "antenna IFA inverted-F 2.4GHz BLE PCB")
+	(property "Reference" "REF**"
+		(at 0 -1.5 0)
+		(layer "F.SilkS")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "ANT_v1_IFA"
+		(at 0 1.5 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_rect
+		(start -1 -1)
+		(end 1 1)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+	)
+	(fp_text user "IFA: copy v1 antenna geometry + keepout"
+		(at 0 0.2 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 0.4 0.4)
+				(thickness 0.06)
+			)
+		)
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 -0.4 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 0.5 0.5)
+				(thickness 0.08)
+			)
+		)
+	)
+	(fp_circle
+		(center 0 0)
+		(end 0.35 0)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+	)
+	(pad "1" smd rect
+		(at 0 0)
+		(size 1 1)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+	(embedded_fonts no)
+)
