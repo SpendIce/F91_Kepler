@@ -26,15 +26,17 @@ def mm(v): return v / 1e6
 FIXED = {
     "U1": (12.5, 13.5,   0),   # CC2652R7 MCU, centre
     "J1": (12.5,  4.5, 180),   # LCD FPC, top edge
-    "AE1": (1.2, 13.5,   0),   # IFA antenna feed, far-left edge
-    "SW1": (2.2,  9.0, 270),   # BTN1 / BSL, left edge
+    # Johanson 2450AT18A100 chip antenna — TOP-LEFT corner, horizontal on TOP
+    # edge (left of J1). Frees the left edge for SW1. 6.5mm ground keepout below.
+    "AE1": (4.3,  1.9,   0),
+    "SW1": (2.2,  9.0, 270),   # BTN1 / BSL, left edge (original spot, now free)
     "SW2": (22.8, 7.0,  90),   # BTN2, right-top edge (clear of TR arc)
     "SW3": (22.8, 19.0, 90),   # BTN3, right-bottom edge
     "BT1": (4.0, 19.5,  90),   # LiPo connector, bottom-left (clear of pogo row)
     # RF front-end — locked for short, non-crossing diff pair to U1 RF pins
     # U1 RF_P@(9.06,10.75) RF_N@(9.06,11.25); FL1 rot270 keeps P-top/N-bottom.
     "FL1": (7.4, 10.9, 270),   # balun, hugs U1 RF pins (was 6 mm away @16.8)
-    "R2":  (5.0, 12.0,  90),   # 0R series jumper, on the U1->antenna path
+    "R2":  (6.0,  4.0,  90),   # 0R series jumper, antenna(top) -> FL1 path
     "L2":  (17.5, 12.4, 90),   # DCDC inductor, locked next to U1 DCDC_SW pin33
     # pogo charging row, bottom edge, 2.3 mm pitch (mechanical — fixed)
     # inboard x=5.6..19.4 so end pads clear the corner-arc rings
@@ -52,7 +54,7 @@ SEED = {
     "U4": (19.5, 14.5, 180),   # XC6206 LDO
     "U5": ( 6.5,  8.5,   0),   # LIS2DW12 accel, left
     "U6": ( 4.0, 18.0,   0),   # DRV2605L haptic, left-mid
-    "U7": ( 6.0,  5.5,   0),   # ST25DV NFC, top-left
+    "U7": ( 8.5,  6.5,   0),   # ST25DV NFC (moved right, out of antenna keepout)
     "Y1": (10.0, 19.0,   0),   # 48 MHz xtal, below U1
     "Y2": ( 5.5, 13.0,   0),   # 32 kHz xtal, left of U1
     "FB1": (13.5, 18.8,  0),   # +3V0->VDDS ferrite, below U1 (near VDDS pins)
@@ -206,8 +208,14 @@ def hpwl():
         if len(xs)>=2: tot+=(max(xs)-min(xs))+(max(ys)-min(ys))
     return tot
 
+# antenna near-field reservation: keep parts off the antenna body + small
+# margin (the 6.5x6.5 NO-GROUND zone is a separate pour keepout added later;
+# components may sit at its edge on a board this dense).
+ANT_KEEPOUT=(1.8, -0.5, 7.0, 3.4)   # (l,t,r,b) mm — antenna body on top edge
+
 def place_pass(hints, order):
     occupied.clear(); final_xy.clear(); fails=[]
+    occupied.append(ANT_KEEPOUT)                      # reserve antenna corner
     for ref,(x,y,rot) in FIXED.items():               # pin fixed
         fp=allfps.get(ref)
         if not fp: continue
@@ -257,8 +265,8 @@ print(f"pass 0  HPWL={best_cost:7.1f}  fails={len(fails)}  (saved)")
 # complete, collision-free layout — no fragile re-apply afterwards.
 # anneal: try decreasing pull strengths; accept only fails==0 improvements so
 # the saved board stays complete. Restart from best each alpha level.
-for ALPHA in (0.6,0.45,0.35,0.25,0.18,0.12):
-    for it in range(6):
+for ALPHA in (0.6,0.4,0.25,0.15):
+    for it in range(4):
         newh=dict(hints)
         for ref in MOVABLE:
             nb=[best[o] for o in adj[ref] if o in best]
