@@ -35,6 +35,7 @@ FIXED = {
     # U1 RF_P@(9.06,10.75) RF_N@(9.06,11.25); FL1 rot270 keeps P-top/N-bottom.
     "FL1": (7.4, 10.9, 270),   # balun, hugs U1 RF pins (was 6 mm away @16.8)
     "R2":  (5.0, 12.0,  90),   # 0R series jumper, on the U1->antenna path
+    "L2":  (17.5, 12.4, 90),   # DCDC inductor, locked next to U1 DCDC_SW pin33
     # pogo charging row, bottom edge, 2.3 mm pitch (mechanical — fixed)
     # inboard x=5.6..19.4 so end pads clear the corner-arc rings
     "TP1": (5.6, 25.5, 0), "TP2": (7.9, 25.5, 0), "TP3": (10.2, 25.5, 0),
@@ -54,8 +55,8 @@ SEED = {
     "U7": ( 6.0,  5.5,   0),   # ST25DV NFC, top-left
     "Y1": (10.0, 19.0,   0),   # 48 MHz xtal, below U1
     "Y2": ( 5.5, 13.0,   0),   # 32 kHz xtal, left of U1
-    "FB1": (16.5, 10.0,  0),   # DCDC ferrite, right of U1
-    "L2": (18.5, 16.5,   0),   # DCDC inductor, right of U1
+    "FB1": (13.5, 18.8,  0),   # +3V0->VDDS ferrite, below U1 (near VDDS pins)
+    # L2 now DCDC-locked in FIXED (see above); FL1, R2 RF-locked in FIXED
     # FL1, R2 now RF-locked in FIXED (see above)
 }
 
@@ -219,6 +220,11 @@ def place_pass(hints, order):
     still=[]
     for ref in fails:
         if not place_near(allfps[ref], 12.5, 13.5, rots_for(ref)): still.append(ref)
+    # never leave a part at (0,0)/off-board: park truly-unplaceable parts at
+    # their hint (on-board, overlapping -> DRC will flag it, not hide it)
+    for ref in still:
+        hx,hy=hints[ref]; set_pos(allfps[ref],hx,hy,rots_for(ref)[0])
+        final_xy[ref]=(hx,hy)
     return still
 
 # ── initial hints: SEED targets + passive HOME-IC; degree/area order ─────────
@@ -233,12 +239,13 @@ for ref in MOVABLE:                                    # passive -> home IC seed
         elif home in SEED:  hints[ref]=(SEED[home][0],SEED[home][1])
 
 def place_order():
-    # big parts (>=4 mm^2) first so they claim space, then by signal degree
-    big=sorted([r for r in MOVABLE if area_now(allfps[r])>=4.0],
-               key=lambda r:-area_now(allfps[r]))
-    small=sorted([r for r in MOVABLE if area_now(allfps[r])<4.0],
-                 key=lambda r:(-len(adj[r]),-area_now(allfps[r])))
-    return big+small
+    # SEED ICs and big parts first (claim space, incl. power-only parts like L2
+    # that have 0 signal degree), then passives by signal degree
+    early=sorted([r for r in MOVABLE if r in SEED or area_now(allfps[r])>=4.0],
+                 key=lambda r:-area_now(allfps[r]))
+    rest=sorted([r for r in MOVABLE if r not in SEED and area_now(allfps[r])<4.0],
+                key=lambda r:(-len(adj[r]),-area_now(allfps[r])))
+    return early+rest
 order=place_order()
 fails=place_pass(hints,order)
 best=dict(final_xy); best_cost=hpwl(); best_fails=list(fails)
@@ -270,3 +277,12 @@ for ALPHA in (0.6,0.45,0.35,0.25,0.18,0.12):
 total=len(list(allfps))
 print(f"BEST  placed: {total-len(best_fails)}/{total}  HPWL={best_cost:.1f}")
 if best_fails: print("UNPLACED:", best_fails)
+
+# ── safety: reload the saved board and assert no part is off-board ───────────
+chk=pcbnew.LoadBoard(OUT)
+off=[]
+for fp in chk.GetFootprints():
+    c=fp.GetPosition(); x,y=c.x/1e6,c.y/1e6
+    if x<0.3 or x>24.7 or y<0.3 or y>26.7: off.append((fp.GetReference(),round(x,2),round(y,2)))
+if off: print("!! OFF-BOARD PARTS:", off)
+else:   print("OK: all parts on-board")
