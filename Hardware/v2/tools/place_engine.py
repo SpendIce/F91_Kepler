@@ -169,40 +169,101 @@ def place_near(fp, hx, hy, rots):
     final_xy[fp.GetReference()]=(cx,cy)
     return True
 
-placed=set()
-fails=[]
-
-# ── 1. pin FIXED ─────────────────────────────────────────────────────────────
-for ref,(x,y,rot) in FIXED.items():
-    fp=b.FindFootprintByReference(ref)
-    if not fp: print("MISSING fixed", ref); continue
-    set_pos(fp,x,y,rot)
-    l,t,r,bm=fp_bbox_mm(fp); add_occ(l,t,r,bm)
-    placed.add(ref); final_xy[ref]=(x,y)
-
-# ── 2. place SEED big parts, largest-first, nearest to hint ─────────────────
 def area_now(fp):
     l,t,r,bm=fp_bbox_mm(fp); return (r-l)*(bm-t)
-seed_fps=[(b.FindFootprintByReference(r),hint) for r,hint in SEED.items()]
-seed_fps=[(fp,h) for fp,h in seed_fps if fp]
-for fp,(hx,hy,rot) in sorted(seed_fps,key=lambda t:-area_now(t[0])):
-    if place_near(fp,hx,hy,[rot]):
-        placed.add(fp.GetReference())
-    else:
-        fails.append(fp.GetReference())
 
-# ── 3. place passives, nearest to FINAL position of home part ───────────────
-passives=[fp for fp in b.GetFootprints() if fp.GetReference() not in placed]
-for fp in sorted(passives, key=area_now, reverse=True):
-    ref=fp.GetReference()
-    home=HOME.get(ref,"U1")
-    hx,hy=final_xy.get(home,(12.5,13.5))
-    if not place_near(fp,hx,hy,[90,0]):
-        fails.append(ref)
+# ── signal connectivity (power/ground excluded — they get poured) ────────────
+from collections import defaultdict
+POWER={"GND","+3V0","VDDS","VDDR","VBAT","BATN","DCOUPL","DCDC_SW"}
+allfps={fp.GetReference():fp for fp in b.GetFootprints()}
+net_refs=defaultdict(set)
+for ref,fp in allfps.items():
+    for p in fp.Pads():
+        n=p.GetNetname()
+        if n and n not in POWER: net_refs[n].add(ref)
+sig_nets={n:rs for n,rs in net_refs.items() if 2<=len(rs)<=8}
+adj=defaultdict(set)
+for n,rs in sig_nets.items():
+    for a in rs:
+        adj[a] |= (rs-{a})
 
-total=len(list(b.GetFootprints()))
-print(f"placed: {total-len(fails)}/{total}")
-if fails: print("FAILED to place:", fails)
+ROT={r:rot for r,(_,_,rot) in SEED.items()}          # seed rotations
+for r in FIXED: ROT[r]=FIXED[r][2]
+def rots_for(ref):
+    return [ROT[ref]] if ref in ROT else [90,0]
 
-b.Save(OUT)
-print("saved", OUT)
+MOVABLE=[r for r in allfps if r not in FIXED]
+
+def hpwl():
+    tot=0.0
+    for n,rs in sig_nets.items():
+        xs=[final_xy[r][0] for r in rs if r in final_xy]
+        ys=[final_xy[r][1] for r in rs if r in final_xy]
+        if len(xs)>=2: tot+=(max(xs)-min(xs))+(max(ys)-min(ys))
+    return tot
+
+def place_pass(hints, order):
+    occupied.clear(); final_xy.clear(); fails=[]
+    for ref,(x,y,rot) in FIXED.items():               # pin fixed
+        fp=allfps.get(ref)
+        if not fp: continue
+        set_pos(fp,x,y,rot); l,t,r,bm=fp_bbox_mm(fp); add_occ(l,t,r,bm)
+        final_xy[ref]=(x,y)
+    for ref in order:                                  # place movable
+        fp=allfps[ref]; hx,hy=hints[ref]
+        if not place_near(fp,hx,hy,rots_for(ref)): fails.append(ref)
+    # absorb any failures into ANY free slot so the board stays complete+clean
+    still=[]
+    for ref in fails:
+        if not place_near(allfps[ref], 12.5, 13.5, rots_for(ref)): still.append(ref)
+    return still
+
+# ── initial hints: SEED targets + passive HOME-IC; degree/area order ─────────
+hints={}
+for ref in MOVABLE:
+    if ref in SEED: hints[ref]=(SEED[ref][0],SEED[ref][1])
+    else:           hints[ref]=(12.5,13.5)
+for ref in MOVABLE:                                    # passive -> home IC seed
+    if ref not in SEED:
+        home=HOME.get(ref,"U1")
+        if home in FIXED:   hints[ref]=(FIXED[home][0],FIXED[home][1])
+        elif home in SEED:  hints[ref]=(SEED[home][0],SEED[home][1])
+
+def place_order():
+    # big parts (>=4 mm^2) first so they claim space, then by signal degree
+    big=sorted([r for r in MOVABLE if area_now(allfps[r])>=4.0],
+               key=lambda r:-area_now(allfps[r]))
+    small=sorted([r for r in MOVABLE if area_now(allfps[r])<4.0],
+                 key=lambda r:(-len(adj[r]),-area_now(allfps[r])))
+    return big+small
+order=place_order()
+fails=place_pass(hints,order)
+best=dict(final_xy); best_cost=hpwl(); best_fails=list(fails)
+b.Save(OUT)                                    # pass 0 is the current best on disk
+print(f"pass 0  HPWL={best_cost:7.1f}  fails={len(fails)}  (saved)")
+
+# ── force-directed refinement: pull toward signal-neighbour centroid ─────────
+# Each accepted-best pass is saved immediately, so OUT always holds the best
+# complete, collision-free layout — no fragile re-apply afterwards.
+# anneal: try decreasing pull strengths; accept only fails==0 improvements so
+# the saved board stays complete. Restart from best each alpha level.
+for ALPHA in (0.6,0.45,0.35,0.25,0.18,0.12):
+    for it in range(6):
+        newh=dict(hints)
+        for ref in MOVABLE:
+            nb=[best[o] for o in adj[ref] if o in best]
+            if nb and ref in best:
+                cxx=sum(p[0] for p in nb)/len(nb); cyy=sum(p[1] for p in nb)/len(nb)
+                bx,by=best[ref]
+                newh[ref]=((1-ALPHA)*bx+ALPHA*cxx, (1-ALPHA)*by+ALPHA*cyy)
+        fails=place_pass(newh,place_order())
+        c=hpwl()
+        tag=""
+        if len(fails)==0 and c<best_cost-0.3:
+            best=dict(final_xy); best_cost=c; best_fails=[]; hints=newh
+            b.Save(OUT); tag=" * saved"
+        print(f"a={ALPHA:.2f} it{it}  HPWL={c:7.1f}  fails={len(fails)}{tag}")
+
+total=len(list(allfps))
+print(f"BEST  placed: {total-len(best_fails)}/{total}  HPWL={best_cost:.1f}")
+if best_fails: print("UNPLACED:", best_fails)
