@@ -31,6 +31,10 @@ FIXED = {
     "SW2": (22.8, 7.0,  90),   # BTN2, right-top edge (clear of TR arc)
     "SW3": (22.8, 19.0, 90),   # BTN3, right-bottom edge
     "BT1": (4.0, 19.5,  90),   # LiPo connector, bottom-left (clear of pogo row)
+    # RF front-end — locked for short, non-crossing diff pair to U1 RF pins
+    # U1 RF_P@(9.06,10.75) RF_N@(9.06,11.25); FL1 rot270 keeps P-top/N-bottom.
+    "FL1": (7.4, 10.9, 270),   # balun, hugs U1 RF pins (was 6 mm away @16.8)
+    "R2":  (5.0, 12.0,  90),   # 0R series jumper, on the U1->antenna path
     # pogo charging row, bottom edge, 2.3 mm pitch (mechanical — fixed)
     # inboard x=5.6..19.4 so end pads clear the corner-arc rings
     "TP1": (5.6, 25.5, 0), "TP2": (7.9, 25.5, 0), "TP3": (10.2, 25.5, 0),
@@ -50,10 +54,9 @@ SEED = {
     "U7": ( 6.0,  5.5,   0),   # ST25DV NFC, top-left
     "Y1": (10.0, 19.0,   0),   # 48 MHz xtal, below U1
     "Y2": ( 5.5, 13.0,   0),   # 32 kHz xtal, left of U1
-    "FL1": (15.5, 18.5,  0),   # RF balun, below U1
     "FB1": (16.5, 10.0,  0),   # DCDC ferrite, right of U1
     "L2": (18.5, 16.5,   0),   # DCDC inductor, right of U1
-    "R2":  (3.5, 16.0,  90),   # 0R antenna series jumper
+    # FL1, R2 now RF-locked in FIXED (see above)
 }
 
 # home IC for each passive cluster (refined from net-share analysis + intent)
