@@ -16,9 +16,9 @@ BOARD, DRCJSON = sys.argv[1], sys.argv[2]
 RES = 0.05                      # mm per cell
 W, H = 25.0, 27.0
 NX, NY = int(W / RES) + 1, int(H / RES) + 1
-CLR = 0.2
+CLR = 0.15
 RF_CLR = 0.15
-VIA_D, VIA_DRILL = 0.6, 0.3
+VIA_D, VIA_DRILL = 0.5, 0.24    # JLC: annular 0.13, drill >= 0.2
 EDGE = 0.30                     # copper-edge margin (rule 0.25)
 
 b = pcbnew.LoadBoard(BOARD)

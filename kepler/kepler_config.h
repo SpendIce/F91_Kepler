@@ -63,6 +63,40 @@
 #define KEPLER_RFSW_PWR_PIN         IOID_30   /* Board_DIO30_SWPWR         */
 
 /*==========================================================================*
+ *  TIER 1.5 — V2 PCB (CC2652R7 RGZ48)  — AUTHORITATIVE PIN MAP            *
+ *                                                                          *
+ *  Source of truth: Hardware/v2/f91_kepler_v2.kicad_sch / .kicad_pcb and  *
+ *  Hardware/v2/PINMAP.md.  LCD moved to top-edge DIOs (26-30) because the *
+ *  QFN south pads are unroutable on the 2-layer board (see PINMAP.md).    *
+ *  Build with -DKEPLER_BOARD_V2 to activate.                              *
+ *==========================================================================*/
+#ifdef KEPLER_BOARD_V2
+  /* buttons (SW1 left, SW2/SW3 right edge) */
+  #undef  KEPLER_BTN1_PIN
+  #undef  KEPLER_BTN2_PIN
+  #undef  KEPLER_BTN3_PIN
+  #define KEPLER_BTN1_PIN           IOID_0    /* pad 5                     */
+  #define KEPLER_BTN2_PIN           IOID_25   /* pad 38                    */
+  #define KEPLER_BTN3_PIN           IOID_20   /* pad 30                    */
+  /* Sharp Memory LCD (J1 FPC, top edge) */
+  #define KEPLER_V2_LCD_MOSI_PIN    IOID_27   /* pad 40                    */
+  #define KEPLER_V2_LCD_SCLK_PIN    IOID_28   /* pad 41                    */
+  #define KEPLER_V2_LCD_CS_PIN      IOID_29   /* pad 42 — ACTIVE HIGH      */
+  #define KEPLER_V2_LCD_DISP_PIN    IOID_30   /* pad 43                    */
+  #define KEPLER_V2_LCD_VCOM_PIN    IOID_26   /* pad 39 — EXTCOMIN         */
+  /* UART bootloader / debug console (pogo pads TP6/TP7) */
+  #define KEPLER_V2_UART_RX_PIN     IOID_9    /* pad 15                    */
+  #define KEPLER_V2_UART_TX_PIN     IOID_10   /* pad 16                    */
+  /* peripherals */
+  #define KEPLER_V2_ACC_INT1_PIN    IOID_7    /* pad 12 — LIS2DW12 INT1    */
+  #define KEPLER_V2_ACC_INT2_PIN    IOID_11   /* pad 17 — LIS2DW12 INT2    */
+  #define KEPLER_V2_NFC_GPO_PIN     IOID_14   /* pad 20 — ST25DV GPO       */
+  #define KEPLER_V2_CHG_DET_PIN     IOID_21   /* pad 31 — Qi charge detect */
+  #define KEPLER_V2_BUZZER_PIN      IOID_22   /* pad 32 — piezo PWM        */
+  #define KEPLER_V2_HAPTIC_EN_PIN   IOID_24   /* pad 37 — DRV2605L EN      */
+#endif /* KEPLER_BOARD_V2 */
+
+/*==========================================================================*
  *  TIER 2 — LAUNCHPAD DEVELOPMENT  (KEPLER_PHASE0_LAUNCHPAD_OVERRIDE)     *
  *                                                                          *
  *  Temporary GPIO assignments for Phase 0 on the CC2640R2F launchpad.     *
