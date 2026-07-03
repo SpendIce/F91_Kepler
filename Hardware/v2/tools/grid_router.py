@@ -18,7 +18,7 @@ W, H = 25.0, 27.0
 NX, NY = int(W / RES) + 1, int(H / RES) + 1
 CLR = 0.15
 RF_CLR = 0.15
-VIA_D, VIA_DRILL = 0.5, 0.24    # JLC: annular 0.13, drill >= 0.2
+VIA_D, VIA_DRILL = 0.46, 0.20   # JLC: annular 0.13 exact, drill 0.2
 EDGE = 0.30                     # copper-edge margin (rule 0.25)
 
 b = pcbnew.LoadBoard(BOARD)
@@ -120,7 +120,14 @@ for u in d.get("unconnected_items", []):
 def prio(c):
     net = c[0]
     d2 = math.hypot(c[1][0] - c[2][0], c[1][1] - c[2][1])
-    group = 0 if net == "GND" else (1 if net in pwr else 2)
+    if net.startswith("LCD_"):
+        group = -1        # scarce north-lane capacity: LCD claims it first
+    elif net == "GND":
+        group = 0
+    elif net in pwr:
+        group = 1
+    else:
+        group = 2
     return (group, d2)
 conns.sort(key=prio)
 print(f"{len(conns)} connections to route")
