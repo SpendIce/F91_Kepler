@@ -39,7 +39,11 @@ DIV = float(res[2]) * 1000.0               # units per mm (10 per um -> 10000/mm
 netout = find(routes, "network_out")[0]
 
 b = pcbnew.LoadBoard(BOARD)
-LAYER = {"F.Cu": pcbnew.F_Cu, "B.Cu": pcbnew.B_Cu}
+LAYER = {"F.Cu": pcbnew.F_Cu, "In1.Cu": pcbnew.In1_Cu,
+         "In2.Cu": pcbnew.In2_Cu, "B.Cu": pcbnew.B_Cu}
+# In1.Cu is the solid GND plane — signal wires there would carve up the
+# return path, so anything the router put on it gets dropped.
+PLANE = {pcbnew.In1_Cu}
 
 removed = 0
 for t in list(b.GetTracks()):
@@ -76,6 +80,8 @@ for net in find(netout, "net"):
             layer, width, coords = path[1], path[2], path[3:]
             pts = [(C(coords[i]), C(str(-float(coords[i + 1]))))
                    for i in range(0, len(coords), 2)]
+            if LAYER[layer] in PLANE:
+                continue
             for (x1, y1), (x2, y2) in zip(pts, pts[1:]):
                 if key_seg(x1, y1, x2, y2) in locked_keys:
                     continue
