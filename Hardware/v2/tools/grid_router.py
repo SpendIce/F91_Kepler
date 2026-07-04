@@ -366,6 +366,11 @@ for net, ((x1, y1), sl), ((x2, y2), gl) in conns:
         continue                    # its copper is gone; next run re-pairs it
     code = b.FindNet(net).GetNetCode()
     hw = width_for(net) / 2
+    # via-in-pad: endpoint gains every layer where its cell holds own-net copper
+    six, siy = int(round(x1 / RES)), int(round(y1 / RES))
+    gix, giy = int(round(x2 / RES)), int(round(y2 / RES))
+    sl = tuple(set(sl) | {L for L in ALL_L if hard[L][siy, six] == code})
+    gl = tuple(set(gl) | {L for L in ALL_L if hard[L][giy, gix] == code})
     common = set(sl) & set(gl)
     if math.hypot(x2 - x1, y2 - y1) < 0.35 and common:
         # sub-grid gap (track end shy of a pad, etc.): bridge exactly

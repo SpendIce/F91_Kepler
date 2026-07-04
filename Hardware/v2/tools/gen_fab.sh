@@ -10,7 +10,7 @@ OUT=fab
 rm -rf "$OUT" && mkdir -p "$OUT/gerbers"
 
 kicad-cli pcb export gerbers \
-  --layers F.Cu,B.Cu,F.Paste,B.Paste,F.Silkscreen,B.Silkscreen,F.Mask,B.Mask,Edge.Cuts \
+  --layers F.Cu,In1.Cu,In2.Cu,B.Cu,F.Paste,B.Paste,F.Silkscreen,B.Silkscreen,F.Mask,B.Mask,Edge.Cuts \
   --subtract-soldermask \
   -o "$OUT/gerbers/" "$BOARD"
 
