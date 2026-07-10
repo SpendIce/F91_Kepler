@@ -153,8 +153,10 @@ On sign-off: copy into `kepler/kepler_config.h` Tier 1, set the
 
 ## 5. Layout constraints (case-driven, Plan Maestro §5.4/§14)
 
-- Usable area ≈ 30 × 28 mm; board thickness **1.0 mm** (explicit at order);
-  edges must not intrude on the gasket seat.
+- Current fabrication envelope: rounded **25 × 27 mm** board, thickness
+  **1.0 mm** (explicit at order); edges must not intrude on the gasket seat.
+  This is based on the matching Ollee/Module-593 envelope; final release still
+  requires a physical case-and-bracket measurement.
 - Rear copper, three concentric zones: NFC loop (1 turn, perimeter ~30 mm) →
   charge coil (4–5 turns, ~20 mm ID) → ground pour + routing. **No ground pour
   under coil or NFC loop.**
@@ -167,7 +169,7 @@ On sign-off: copy into `kepler/kepler_config.h` Tier 1, set the
 
 | Parameter | Value |
 |---|---|
-| Layers | 2 |
+| Layers | 4: `F.Cu` signal/components, `In1.Cu` solid GND, `In2.Cu` routing/power, `B.Cu` signal |
 | Thickness | **1.0 mm** (not default 1.6) |
 | Finish | **ENIG** (pogo pads + fine-pitch FPC) |
 | Copper | 1 oz |

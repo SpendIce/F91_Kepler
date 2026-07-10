@@ -7,6 +7,21 @@ set -euo pipefail
 BOARD=f91_kepler_v2.kicad_pcb
 SCH=f91_kepler_v2.kicad_sch
 OUT=fab
+
+# A fabrication archive is only meaningful when the design's hard electrical
+# and physical checks pass.  Keep reports temporary so generated verification
+# artefacts never become accidental release inputs.
+DRC_REPORT=$(mktemp)
+ERC_REPORT=$(mktemp)
+trap 'rm -f "$DRC_REPORT" "$ERC_REPORT"' EXIT
+
+kicad-cli pcb drc \
+  --schematic-parity --severity-error --exit-code-violations \
+  --output "$DRC_REPORT" "$BOARD"
+kicad-cli sch erc \
+  --severity-error --exit-code-violations \
+  --output "$ERC_REPORT" "$SCH"
+
 rm -rf "$OUT" && mkdir -p "$OUT/gerbers"
 
 kicad-cli pcb export gerbers \

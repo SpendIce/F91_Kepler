@@ -46,8 +46,8 @@ el gate sigue rojo.
 
 | Tema | Evidencia actual | Acción requerida |
 | --- | --- | --- |
-| Stackup | El `.kicad_pcb` declara `F.Cu`, `In1.Cu`, `In2.Cu`, `B.Cu`; `tools/gen_fab.sh` exporta esas cuatro capas. `pcb_v2_fab_package.md` y `v2_pcb_layout_guide.md` aún piden una orden de dos capas. | Elegir y documentar **cuatro capas** o volver el layout a dos antes de continuar. No enviar un Gerber de cuatro capas con una orden de dos. |
-| Envolvente mecánica | El contorno generado actual es 25×27 mm; el Plan Maestro y la guía refieren 30×28 mm. | Medir asiento real de junta/caja y fijar un datum mecánico. Revalidar borde, bracket, LiPo, motor y pads pogo contra ese datum. |
+| Stackup | El `.kicad_pcb` declara `F.Cu`, `In1.Cu`, `In2.Cu`, `B.Cu`; `In1.Cu` es plano GND. | **Baseline adoptado: cuatro capas / 1.0 mm.** `F.Cu` y `B.Cu` quedan para señal/componentes e `In2.Cu` para ruteo/potencia. Usar el stackup estándar 4L/1.0 mm del fabricante para el cierre RF. |
+| Envolvente mecánica | El contorno generado actual es 25×27 mm; la PCB Ollee compatible con el mismo módulo 593 mide aproximadamente 25×26–27 mm por comparación fotográfica. | **Baseline adoptado: 25×27 mm redondeado.** Medir asiento real de junta/caja y fijar el datum antes de la orden; no crecer hacia la referencia histórica de 30×28 mm. Revalidar borde, bracket, LiPo, motor y pads pogo contra ese datum. |
 | RF y carga/NFC | Hay cobre y vías al borde en ANT_FEED, GND, VBAT, +3V0 y otras redes; existen lazos de carga/NFC previstos. | Tras fijar stackup y contorno, revisar keepouts y retorno RF antes de aceptar excepciones DRC. Ninguna excepción puede justificar cobre fuera del borde. |
 
 ## Orden de avance ejecutable

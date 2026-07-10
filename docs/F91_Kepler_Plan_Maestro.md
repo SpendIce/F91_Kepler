@@ -585,7 +585,11 @@ ventana de sueño 22:00–08:00.
 
 **Restricciones de PCB:**
 
-- Debe entrar en la caja del F91W: ~30 mm × 28 mm de área activa, ~1.2 mm de espesor máximo.
+- El baseline v2 es un contorno redondeado de **25 mm × 27 mm** y 1.0 mm de
+  espesor, coherente con una PCB Ollee compatible con el módulo 593. Es una
+  envolvente máxima de diseño, no un rectángulo libre: conservar los radios y
+  liberar el asiento de la junta. Antes de producción, validar el datum contra
+  una caja F91W física y el bracket v2.
 - Los bordes de la PCB no deben sobresalir del asiento de la junta.
 - El motor ERM va en un recess del bracket impreso, no en la PCB.
 - La celda LiPo va detrás de la PCB (entre PCB y tapa).
@@ -594,10 +598,13 @@ ventana de sueño 22:00–08:00.
 la cara trasera; alineación de acceso a pogo pins; posiciona la PCB para que la
 bobina de carga quede centrada con la tapa.
 
-**Especificaciones de orden JLCPCB:** 2 capas, **1.0 mm de espesor** (no el
-estándar 1.6 mm — especificarlo); relleno de cobre trasero evitando el área bajo
-la bobina de carga y la antena NFC; acabado **ENIG** (recomendado para los pads de
-pogo); ordenar **10 unidades** (price break + repuestos para rework).
+**Especificaciones de orden JLCPCB:** 4 capas, **1.0 mm de espesor** (no el
+estándar 1.6 mm — especificarlo), con `In1.Cu` como plano GND continuo y
+`In2.Cu` para ruteo/distribución de potencia; relleno de cobre trasero evitando
+el área bajo la bobina de carga y la antena NFC; acabado **ENIG** (recomendado
+para los pads de pogo); ordenar **10 unidades** (price break + repuestos para
+rework). Seleccionar el stackup estándar 4L/1.0 mm del fabricante y verificar
+el retorno RF contra sus dieléctricos antes de liberar Gerbers.
 
 ---
 
@@ -657,7 +664,7 @@ agujeros, sin cutout USB-C, sin modificar junta ni caja.
 
 ### Fase 2 — PCB v2
 
-- [ ] Layout entra en 30×28 mm; bordes no sobresalen del asiento de junta.
+- [ ] Layout mantiene el contorno redondeado 25×27 mm y bordes fuera del asiento de junta; datum físico validado.
 - [ ] Stackup de 3 zonas con DRC limpio.
 - [ ] Acoplamiento de carga inductiva validado a ~100 mA antes del cierre.
 - [ ] Espesor 1.0 mm y ENIG especificados en la orden.

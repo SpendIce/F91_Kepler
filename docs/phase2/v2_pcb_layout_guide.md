@@ -1,12 +1,11 @@
 # PCB v2 — Layout guide (the remaining human/GUI work)
 
-> Status (2026-06-13): schematic **done + ERC clean**; `Hardware/v2/f91_kepler_v2.kicad_pcb`
-> generated with all 89 footprints placed (rough, off-board spread) + full
-> netlist/ratsnest + 2-layer / 1.0 mm stackup + JLCPCB design rules + a 30×28 mm
-> placeholder outline. DRC on the unrouted board: 202 unconnected (the ratsnest)
-> + 12 clearance (overlapping spread placement) — both expected, no structural
-> errors. Everything below needs the KiCad **GUI** + the physical watch; it
-> cannot be done headlessly and parts of it need RF/mechanical judgment.
+> Current baseline (2026-07-10): `Hardware/v2/f91_kepler_v2.kicad_pcb` is a
+> partially routed **4-layer / 1.0 mm** board (`In1.Cu` GND plane) with a
+> rounded **25×27 mm** envelope. The DFM gate in `v2_dfm_readiness.md` is the
+> authoritative status: DRC/connectivity must be closed before Gerber export.
+> RF, coil/NFC and physical-fit decisions still require the KiCad GUI and the
+> physical watch.
 
 ## 0. Why this is not auto-routed
 
@@ -26,11 +25,14 @@ on a board where a respin costs ~2 weeks. So the board is handed off at the
 3. Regenerating: editing `tools/netlist.py` → `python3 tools/gen_schematic.py`
    then F8 in the GUI re-syncs the board (placement/routing is preserved by ref).
 
-## 2. Board outline (replace the placeholder)
+## 2. Board outline (production datum)
 
-The 30×28 mm rounded rect is a stand-in. Redraw `Edge.Cuts` to the **real F91W
-internal cavity** traced from the watch (the bracket is internal; case stays
-original Casio). Keep edges off the gasket seat. Thickness stays **1.0 mm**.
+The current 25×27 mm rounded `Edge.Cuts` envelope matches a successful
+Module-593-compatible Ollee replacement PCB. Do **not** enlarge it toward the
+older 30×28 placeholder. Before production, measure the real F91W internal
+cavity and gasket seat, then adjust only the contour/radii needed for the
+measured datum. The bracket is internal and the case stays original; thickness
+stays **1.0 mm**.
 
 ## 3. Placement order (case-driven)
 
@@ -90,7 +92,7 @@ shorts, instead of SMD tactiles. SW1 also is the **BSL backdoor** button.
 - [ ] [BENCH-TUNE] coil coupling prototyped before sealing
 - [ ] Gerbers + drill + pos + BOM exported (`kicad-cli pcb export gerbers/drill/pos`),
       reviewed in a separate viewer
-- [ ] JLCPCB order: 2-layer, **1.0 mm**, ENIG, 10 pcs, 2 assembled (fab doc §6)
+- [ ] JLCPCB order: 4-layer, **1.0 mm**, ENIG, 10 pcs, 2 assembled (fab doc §6)
 
 ## 9. Headless exports (once routed + DRC-clean)
 
