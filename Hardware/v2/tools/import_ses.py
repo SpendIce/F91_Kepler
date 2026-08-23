@@ -6,10 +6,16 @@ skipping (type protect) entries (those are the locked tracks already on
 the board). Coordinates: value/10 um, y negated. Refills zones.
 
 Usage: python3 import_ses.py BOARD.kicad_pcb SESSION.ses
+       [--keep-existing] [--nets NET1,NET2]
 """
 import sys, re, pcbnew
 
 BOARD, SES = sys.argv[1], sys.argv[2]
+KEEP_EXISTING = "--keep-existing" in sys.argv[3:]
+NET_FILTER = None
+if "--nets" in sys.argv[3:]:
+    i = sys.argv.index("--nets")
+    NET_FILTER = set(sys.argv[i + 1].split(","))
 text = open(SES).read()
 
 # --- tokenize s-expressions ---
@@ -46,10 +52,11 @@ LAYER = {"F.Cu": pcbnew.F_Cu, "In1.Cu": pcbnew.In1_Cu,
 PLANE = {pcbnew.In1_Cu}
 
 removed = 0
-for t in list(b.GetTracks()):
-    if not t.IsLocked():
-        b.Delete(t)
-        removed += 1
+if not KEEP_EXISTING:
+    for t in list(b.GetTracks()):
+        if not t.IsLocked():
+            b.Delete(t)
+            removed += 1
 print("removed unlocked:", removed)
 
 def C(v):  # session units -> pcbnew int (mm-based)
@@ -70,6 +77,8 @@ for t in b.GetTracks():
 added_w = added_v = 0
 for net in find(netout, "net"):
     netname = net[1]
+    if NET_FILTER is not None and netname not in NET_FILTER:
+        continue
     netinfo = b.FindNet(netname)
     if netinfo is None:
         print("WARN: unknown net", netname)

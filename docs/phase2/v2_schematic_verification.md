@@ -241,7 +241,7 @@ For standard 0402 resistors and capacitors in common values (100 nF, 1 µF, 10 n
 
 | Reference | Value / MPN | Package | LCSC Part # | Tier | Notes |
 |-----------|------------|---------|-------------|------|-------|
-| Y1 | FA-128 48 MHz | 3215-4 pin | **[CHECK STOCK]** | Extended | No confirmed LCSC C-number found for 48 MHz variant. C187794 is the 32 MHz Q22FA12800025. Search LCSC for "Q22FA12800150" or "FA-128 48M" directly; RS Components lists it as a 48 MHz SMT part (RS 2053436) as a cross-reference |
+| Y1 | FA-128 48 MHz | 2016-4 pin | **[CHECK STOCK]** | Extended | Epson specifies a 2.0 x 1.6 mm body and a 0.95 x 0.85 mm, 1.45 x 1.15 mm land pattern. No confirmed LCSC C-number found for the 48 MHz variant. C187794 is the 32 MHz Q22FA12800025. Search LCSC for "Q22FA12800150" or "FA-128 48M" directly; RS Components lists it as a 48 MHz SMT part (RS 2053436) as a cross-reference |
 | Y2 | FC-135 32.768 kHz | 3215-2 pin | **C32346** | Extended | Epson Q13FC13500004, 12.5 pF load, 20 ppm; matches C12/C13 12 pF load caps. Alternative C48615 (Q13FC13500002, 7 pF) requires different load caps |
 
 ### Connector
@@ -268,7 +268,7 @@ All standard-value 0402 resistors and capacitors (100 nF, 1 µF, 10 µF, 22 µF,
 - KiCad schematic generated from `netlist.py` — all INSTANCES translated to symbols and wires
 - ERC: 0 errors, 0 warnings (excluding expected PWR\_FLAG nodes per `PWR_FLAGS` list)
 - Custom symbols created: CC2652R7RGZ, LIS2DW12, FS8205A, LFB182G45BG5D920, ST25DV04K-IER8C3
-- Custom footprints created: VQFN-20 (BQ51050B), VSSOP-10 (DRV2605L), LFB18-1608 (balun), crystal 3215-4 pin, battery pads, IFA antenna placeholder
+- Custom footprints created: VQFN-20 (BQ51050B), VSSOP-10 (DRV2605L), LFB18-1608 (balun), Epson FA-128 2016-4 pin, battery pads, IFA antenna placeholder
 - BOM exported: `Hardware/v2/output/f91_kepler_v2_bom.csv`
 - Pin-by-pin verification complete (this document)
 - LCSC part candidates identified for all components except CC2652R7RGZR 48 MHz crystal

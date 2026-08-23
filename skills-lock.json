@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "pcb-hardware-engineer": {
+      "source": "theneoai/awesome-skills",
+      "sourceType": "github",
+      "computedHash": "34b7101efbd880947073740f5d70facf1b5838aae0f1d057214329ede99003a8"
+    }
+  }
+}

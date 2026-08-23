@@ -11,11 +11,11 @@ Pin-number→net tables verified against:
             pad3 RF_N, pad4 RF_P, pads 2/5/6 GND)
 
 DIO plan (docs/phase2/pcb_v2_fab_package.md §4 + BSL + haptic-EN additions):
-  DIO_2 UART_RX / DIO_3 UART_TX (ROM bootloader, fixed) ; DIO_5 SDA ; DIO_6 SCL
-  DIO_7 ACC_INT1 ; DIO_8 ACC_INT2 ; DIO_9 LCD_MOSI ; DIO_10 LCD_SCLK
-  DIO_11 LCD_CS ; DIO_12 LCD_DISP ; DIO_13 LCD_EXTCOMIN ; DIO_14 NFC_GPO
-  DIO_15 BTN_1 (also BSL backdoor) ; DIO_21 CHG_DET ; DIO_22 BUZZER
-  DIO_24 HAPTIC_EN ; DIO_25 BTN_2 ; DIO_26 BTN_3 ; rest NC
+  DIO_0 BTN_1 (also BSL backdoor) ; DIO_5 SDA ; DIO_6 SCL
+  DIO_7 ACC_INT1 ; DIO_9 UART_RX ; DIO_10 UART_TX ; DIO_11 ACC_INT2
+  DIO_14 NFC_GPO ; DIO_20 BTN_3 ; DIO_21 CHG_DET ; DIO_22 BUZZER
+  DIO_24 HAPTIC_EN ; DIO_25 BTN_2 ; DIO_26 LCD_SCLK ; DIO_27 LCD_MOSI
+  DIO_28 LCD_CS ; DIO_29 LCD_EXTCOMIN ; DIO_30 LCD_DISP ; rest NC
 
 Power: VBAT (cell + / BQ BAT out / LDO in) -> XC6206-3.0 -> +3V0 rail.
 Battery protection in the negative path: BATN -- FS8205A -- GND, DW01A
@@ -43,14 +43,14 @@ INSTANCES = [
         "47": "X48M_P", "46": "X48M_N", "3": "X32K_1", "4": "X32K_2",
         "1": "RF_P", "2": "RF_N", "49": "GND",
         # DIOs (package pin -> net)
-        "5": "NC", "6": "NC", "7": "UART_RX", "8": "UART_TX", "9": "NC",
-        "10": "SDA", "11": "SCL", "12": "ACC_INT1", "14": "ACC_INT2",
-        "15": "LCD_MOSI", "16": "LCD_SCLK", "17": "LCD_CS", "18": "LCD_DISP",
-        "19": "LCD_EXTCOMIN", "20": "NFC_GPO", "21": "BTN_1",
-        "26": "NC", "27": "NC", "28": "NC", "29": "NC", "30": "NC",
+        "5": "BTN_1", "6": "NC", "7": "NC", "8": "NC", "9": "NC",
+        "10": "SDA", "11": "SCL", "12": "ACC_INT1", "14": "NC",
+        "15": "UART_RX", "16": "UART_TX", "17": "ACC_INT2", "18": "NC",
+        "19": "NC", "20": "NFC_GPO", "21": "NC",
+        "26": "NC", "27": "NC", "28": "NC", "29": "NC", "30": "BTN_3",
         "31": "CHG_DET", "32": "BUZZER", "36": "NC", "37": "HAPTIC_EN",
-        "38": "BTN_2", "39": "BTN_3", "40": "NC", "41": "NC", "42": "NC",
-        "43": "NC",
+        "38": "BTN_2", "39": "LCD_SCLK", "40": "LCD_MOSI", "41": "LCD_CS",
+        "42": "LCD_EXTCOMIN", "43": "LCD_DISP",
     }),
     # supply: +3V0 -> ferrite -> VDDS
     ("FB1", "Device:FerriteBead", "BLM18HE152SN1", "Inductor_SMD:L_0603_1608Metric", (40, 40), {"1": "+3V0", "2": "VDDS"}),
@@ -69,7 +69,7 @@ INSTANCES = [
     ("R1", R, "100k", F_R0402, (40, 70), {"1": "nRESET", "2": "VDDS"}),
     ("C11", C, "100nF", F_C0402, (55, 70), {"1": "nRESET", "2": "GND"}),
     # crystals
-    ("Y1", "Device:Crystal_GND24", "48MHz FA-128", "f91_footprints:Crystal_SMD_3215-4Pin_3.2x1.5mm", (40, 85), {"1": "X48M_N", "3": "X48M_P", "2": "GND", "4": "GND"}),
+    ("Y1", "Device:Crystal_GND24", "48MHz FA-128", "f91_footprints:Epson_FA-128_2.0x1.6mm", (40, 85), {"1": "X48M_N", "3": "X48M_P", "2": "GND", "4": "GND"}),
     ("Y2", "Device:Crystal", "32.768kHz FC-135", "Crystal:Crystal_SMD_3215-2Pin_3.2x1.5mm", (60, 85), {"1": "X32K_1", "2": "X32K_2"}),
     ("C12", C, "12pF", F_C0402, (75, 85), {"1": "X32K_1", "2": "GND"}),
     ("C13", C, "12pF", F_C0402, (85, 85), {"1": "X32K_2", "2": "GND"}),
@@ -78,7 +78,7 @@ INSTANCES = [
     ("R2", R, "0R", F_R0402, (60, 100), {"1": "RF_UNBAL", "2": "ANT_FEED"}),
     ("C14", C, "DNP", F_C0402, (70, 100), {"1": "RF_UNBAL", "2": "GND"}),
     ("C15", C, "DNP", F_C0402, (80, 100), {"1": "ANT_FEED", "2": "GND"}),
-    ("AE1", "Device:Antenna", "PCB-IFA (v1 geometry)", "f91_footprints:ANT_v1_IFA", (95, 100), {"1": "ANT_FEED"}),
+    ("AE1", "Device:Antenna", "2450AT18A100", "f91_footprints:ANT_2450AT18A100", (95, 100), {"1": "ANT_FEED"}),
     # buttons (active high to +3V0, internal pulldowns in MCU)
     ("SW1", "Switch:SW_Push", "BTN1/BSL", "Button_Switch_SMD:SW_Push_1P1T_NO_CK_KMR2", (40, 130), {"1": "BTN_1", "2": "+3V0"}),
     ("SW2", "Switch:SW_Push", "BTN2", "Button_Switch_SMD:SW_Push_1P1T_NO_CK_KMR2", (55, 130), {"1": "BTN_2", "2": "+3V0"}),
@@ -145,7 +145,7 @@ INSTANCES = [
         "6": "GND", "7": "GND", "1": "FET_D", "8": "FET_D",
     }),
     # LDO 3.0V
-    ("U4", "Regulator_Linear:XC6206PxxxMR", "XC6206P302MR", "Package_TO_SOT_SMD:SOT-23", (180, 155), {"3": "VBAT", "1": "GND", "2": "+3V0"}),
+    ("U4", "f91:XC6206PxxxMR_F91", "XC6206P302MR", "Package_TO_SOT_SMD:SOT-23", (180, 155), {"3": "VBAT", "1": "GND", "2": "+3V0"}),
     ("C32", C, "1uF", F_C0402, (195, 155), {"1": "VBAT", "2": "GND"}),
     ("C33", C, "1uF", F_C0402, (205, 155), {"1": "+3V0", "2": "GND"}),
 
@@ -166,9 +166,9 @@ INSTANCES = [
     ("C37", C, "100nF", F_C0402, (250, 220), {"1": "+3V0", "2": "GND"}),
     ("TP13", TP, "MOTOR+", F_TP, (260, 220), {"1": "MOT_P"}),
     ("TP14", TP, "MOTOR-", F_TP, (270, 220), {"1": "MOT_N"}),
-    ("U7", "RF_NFC:ST25DV04K-IER8C3", "ST25DV04K", "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm", (220, 250), {
+    ("U7", "f91:ST25DV04K_SO8", "ST25DV04K", "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm", (220, 250), {
         "1": "NC", "2": "NFC_A", "3": "NFC_B", "4": "GND",
-        "5": "SDA", "6": "SCL", "7": "NFC_GPO", "8": "+3V0", "9": "NC",
+        "5": "SDA", "6": "SCL", "7": "NFC_GPO", "8": "+3V0",
     }),
     ("C38", C, "100nF", F_C0402, (240, 250), {"1": "+3V0", "2": "GND"}),
     ("R12", R, "100k", F_R0402, (250, 250), {"1": "NFC_GPO", "2": "+3V0"}),
@@ -185,6 +185,54 @@ INSTANCES = [
     }),
     ("C39", C, "100nF", F_C0402, (340, 120), {"1": "+3V0", "2": "GND"}),
     ("C40", C, "1uF", F_C0402, (350, 120), {"1": "+3V0", "2": "GND"}),
+]
+
+# Back-side assembly uses project-owned canonical snapshots of the verified
+# mirrored geometry.  KiCad's stock-library refresh path cannot safely update
+# flipped footprints through pcbnew, and leaving locally modified copies under
+# stock FPIDs produces library-mismatch warnings at the manufacturing gate.
+BACK_CANONICAL_REFS = {
+    "Back_C_0402_1005Metric": {
+        "C18", "C21", "C22", "C23", "C24", "C25", "C26", "C27", "C28",
+        "C29", "C30", "C31", "C32", "C33", "C36", "C37", "C38",
+    },
+    "Back_C_0603_1608Metric": {"C16", "C17", "C19", "C20"},
+    "Back_R_0402_1005Metric": {
+        "R5", "R6", "R7", "R8", "R10", "R11", "R12", "R13", "R14", "W1",
+    },
+    "Back_TestPoint_Pad_1.5x1.5mm": {
+        "TP1", "TP2", "TP3", "TP4", "TP5", "TP6", "TP7", "TP8", "TP9",
+        "TP10", "TP11", "TP12", "TP13", "TP14", "TP15", "TP16",
+    },
+    "Back_SOIC-8_3.9x4.9mm_P1.27mm": {"U7"},
+    "Back_TSSOP-8_3x3mm_P0.65mm": {"Q1"},
+    "Back_SOT-23": {"U4"},
+    "Back_SOT-23-6": {"U3"},
+}
+BACK_FOOTPRINT_BY_REF = {
+    ref: f"f91_footprints:{footprint}"
+    for footprint, refs in BACK_CANONICAL_REFS.items()
+    for ref in refs
+}
+PROJECT_CANONICAL_FOOTPRINT_BY_REF = {
+    "J1": "f91_footprints:F91_LCD_FPC_Hirose_FH12-10",
+    "FL1": "f91_footprints:F91_Murata_LFB18_1608",
+    "BT1": "f91_footprints:Back_BatteryPads",
+    "U6": "f91_footprints:Back_VSSOP-10_3x3mm_P0.5mm",
+    "U2": "f91_footprints:Back_VQFN-20-1EP_4.5x3.5mm_P0.5mm",
+}
+INSTANCES = [
+    (
+        ref,
+        lib_id,
+        value,
+        PROJECT_CANONICAL_FOOTPRINT_BY_REF.get(
+            ref, BACK_FOOTPRINT_BY_REF.get(ref, footprint)
+        ),
+        position,
+        pin_nets,
+    )
+    for ref, lib_id, value, footprint, position, pin_nets in INSTANCES
 ]
 
 # Nets fed only through a passive part (ferrite / series R) or referenced to a

@@ -80,10 +80,10 @@
   #define KEPLER_BTN3_PIN           IOID_20   /* pad 30                    */
   /* Sharp Memory LCD (J1 FPC, top edge) */
   #define KEPLER_V2_LCD_MOSI_PIN    IOID_27   /* pad 40                    */
-  #define KEPLER_V2_LCD_SCLK_PIN    IOID_28   /* pad 41                    */
-  #define KEPLER_V2_LCD_CS_PIN      IOID_29   /* pad 42 — ACTIVE HIGH      */
+  #define KEPLER_V2_LCD_SCLK_PIN    IOID_26   /* pad 39                    */
+  #define KEPLER_V2_LCD_CS_PIN      IOID_28   /* pad 41 — ACTIVE HIGH      */
   #define KEPLER_V2_LCD_DISP_PIN    IOID_30   /* pad 43                    */
-  #define KEPLER_V2_LCD_VCOM_PIN    IOID_26   /* pad 39 — EXTCOMIN         */
+  #define KEPLER_V2_LCD_VCOM_PIN    IOID_29   /* pad 42 — EXTCOMIN         */
   /* UART bootloader / debug console (pogo pads TP6/TP7) */
   #define KEPLER_V2_UART_RX_PIN     IOID_9    /* pad 15                    */
   #define KEPLER_V2_UART_TX_PIN     IOID_10   /* pad 16                    */

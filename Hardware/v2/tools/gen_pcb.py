@@ -42,7 +42,7 @@ def mm(v):
     return pcbnew.FromMM(v)
 
 
-def add_outline(board, w=30.0, h=28.0, r=2.0, x0=0.0, y0=0.0):
+def add_outline(board, w=25.0, h=27.0, r=2.0, x0=0.0, y0=0.0):
     """Rounded-rect board outline on Edge.Cuts (segments + arcs)."""
     edge = pcbnew.Edge_Cuts
     def seg(x1, y1, x2, y2):

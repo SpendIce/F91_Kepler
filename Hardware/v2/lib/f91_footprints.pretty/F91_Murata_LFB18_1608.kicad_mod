@@ -1,0 +1,142 @@
+(footprint "F91_Murata_LFB18_1608"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "Murata LFB18 series integrated balun-filter, 1.6x0.8mm body, 6 terminals. Part: LFB182G45BG5D920. Dual-row 1608 land: 3 pads per long side at 0.5mm pitch, row separation 0.7mm centre-to-centre. Pad numbering: row A (negative-y / top in schematic view) left-to-right = pads 1,2,3; row B (positive-y / bottom) left-to-right = pads 4,5,6. Schematic mapping: pad1=UNBAL, pad2=GND, pad3=RF_N(BAL), pad4=RF_P(BAL), pad5=GND, pad6=GND. [VERIFY pad numbering and row assignment against Murata land pattern QNET2207 / LFB182G45BG5D920 datasheet before layout]")
+	(tags "Murata LFB18 balun filter 1608 2.4GHz BLE")
+	(property "Reference" "REF**"
+		(at 0 -1.35 180)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "538f5ffd-70c5-4124-b018-1ff93b7ca304")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "F91_Murata_LFB18_1608"
+		(at -17 11.35 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "e1b6d234-dd27-4771-b3ae-53270e0ed6e5")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 180)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "be5530fb-7994-48b2-ad4b-c5782494ded6")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 180)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "00acbee0-550b-40a5-9707-9cb500b1b695")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_rect
+		(start -1.2 -0.8)
+		(end 1.2 0.8)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "2229a048-84f8-4f2a-8ccd-3dcb5df149fc")
+	)
+	(fp_line
+		(start -0.8 -0.4)
+		(end -0.5 -0.4)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "b74c092c-2a8e-4fad-bc86-15c71e884cf7")
+	)
+	(fp_rect
+		(start -0.8 -0.4)
+		(end 0.8 0.4)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "ff764500-cefe-4926-a3ca-25880b33a34a")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 0 180)
+		(layer "F.Fab")
+		(uuid "535550c1-1b7d-4d64-84ed-fb435d079727")
+		(effects
+			(font
+				(size 0.4 0.4)
+				(thickness 0.06)
+			)
+		)
+	)
+	(pad "1" smd roundrect
+		(at -0.5 -0.35)
+		(size 0.4 0.3)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.25)
+		(uuid "08432d8e-e134-468a-b0ec-4b00c1158a33")
+	)
+	(pad "2" smd roundrect
+		(at 0 -0.35)
+		(size 0.4 0.3)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.25)
+		(uuid "7b8075fa-5054-45b1-b816-eeef0e6641d2")
+	)
+	(pad "3" smd roundrect
+		(at 0.5 -0.35)
+		(size 0.4 0.3)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.25)
+		(uuid "9a03f2c4-cf09-4bd3-8e0c-5f220dc1bccd")
+	)
+	(pad "4" smd roundrect
+		(at -0.5 0.35)
+		(size 0.4 0.3)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.25)
+		(uuid "54e3f17a-a8f8-4045-a25d-b086392f5e39")
+	)
+	(pad "5" smd roundrect
+		(at 0 0.35)
+		(size 0.4 0.3)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.25)
+		(uuid "c08ae25b-ce60-450d-8628-8516481d62c2")
+	)
+	(pad "6" smd roundrect
+		(at 0.5 0.35)
+		(size 0.4 0.3)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.25)
+		(uuid "59e717d4-40f5-47d8-8129-38bf79809108")
+	)
+	(embedded_fonts no)
+)

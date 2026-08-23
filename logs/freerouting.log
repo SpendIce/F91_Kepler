@@ -1,0 +1,19 @@
+2026-07-02 22:55:39.920 [main] INFO  Freerouting v1.9.0 (build-date: 2023-10-30)
+2026-07-02 22:55:39.957 [main] INFO  Settings were loaded from freerouting.json
+2026-07-02 22:55:40.972 [main] INFO  Opening '/tmp/claude-1000/-home-spendice-Documents-F91-Kepler/7705a934-d92f-4e5f-a5fd-73570a1a964a/scratchpad/f91_full.dsn'...
+2026-07-02 22:55:41.328 [ForkJoinPool.commonPool-worker-1] INFO  New version available: v2.2.4
+2026-07-02 22:55:45.998 [Thread-26] INFO  Starting auto-routing...
+2026-07-02 22:55:46.068 [Thread-26] INFO  Auto-routing was completed in 0.07 seconds.
+2026-07-02 22:55:46.169 [Thread-26] INFO  Starting route optimization on 1 thread...
+2026-07-02 22:55:46.173 [Thread-26] INFO  Route optimization was completed in 0.00 seconds.
+2026-07-02 22:55:46.182 [Thread-26] INFO  Saving '/tmp/claude-1000/-home-spendice-Documents-F91-Kepler/7705a934-d92f-4e5f-a5fd-73570a1a964a/scratchpad/f91_full.ses'...
+2026-07-02 22:55:46.183 [Thread-26] ERROR Couldn't export board to file
+java.lang.NullPointerException: Cannot invoke "app.freerouting.library.Packages.count()" because "p_board.library.packages" is null
+	at app.freerouting.designforms.specctra.SpecctraSesFileWriter.write_placement(SpecctraSesFileWriter.java:91) ~[freerouting-1.9.jar:unspecified]
+	at app.freerouting.designforms.specctra.SpecctraSesFileWriter.write_session_scope(SpecctraSesFileWriter.java:75) ~[freerouting-1.9.jar:unspecified]
+	at app.freerouting.designforms.specctra.SpecctraSesFileWriter.write(SpecctraSesFileWriter.java:43) ~[freerouting-1.9.jar:unspecified]
+	at app.freerouting.interactive.BoardHandling.export_specctra_session_file(BoardHandling.java:912) ~[freerouting-1.9.jar:unspecified]
+	at app.freerouting.gui.MainApplication$1.ExportBoardToFile(MainApplication.java:431) [freerouting-1.9.jar:unspecified]
+	at app.freerouting.gui.MainApplication$1.autorouterFinished(MainApplication.java:404) [freerouting-1.9.jar:unspecified]
+	at app.freerouting.interactive.BatchAutorouterThread.thread_action(BatchAutorouterThread.java:209) [freerouting-1.9.jar:unspecified]
+	at app.freerouting.interactive.InteractiveActionThread.run(InteractiveActionThread.java:56) [freerouting-1.9.jar:unspecified]

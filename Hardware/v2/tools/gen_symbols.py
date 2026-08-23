@@ -5,6 +5,8 @@ Custom symbols not present in the stock KiCad libraries:
   CC2652R7RGZ  - TI SWRS253B pin table (VQFN-48 + EGP thermal pad as pin 49)
   LIS2DW12     - ST DS (DocID029682) LGA-12 pin table
   FS8205A      - Fortune FS8205A-DS-12_EN TSSOP-8 pin table (common-drain dual NMOS)
+  ST25DV04K_SO8 - ST DS10925 SO8 pin table (no UFDFPN exposed pad)
+  XC6206PxxxMR_F91 - XC6206 SOT-23 regulator with fixed pin contract
 
 Pin data is transcribed from docs/phase2/v2_reference_circuits.md (verified
 against primary datasheets). Regenerate with:  python3 gen_symbols.py
@@ -47,7 +49,7 @@ LIS2DW12 = [
     ("9",  "VDD",     "L", "power_in"),
     ("10", "VDD_IO",  "L", "power_in"),
     ("2",  "CS",      "L", "input"),
-    ("3",  "SDO/SA0", "L", "bidirectional"),
+    ("3",  "SDO/SA0", "L", "passive"),
     ("4",  "SDA",     "L", "bidirectional"),
     ("1",  "SCL",     "L", "input"),
     ("12", "INT1",    "R", "output"),
@@ -79,6 +81,23 @@ LFB18 = [
     ("2", "GND",   "B", "power_in"),
     ("5", "GND",   "B", "power_in"),
     ("6", "GND",   "B", "power_in"),
+]
+
+ST25DV04K_SO8 = [
+    ("1", "V_EH", "R", "power_out"),
+    ("2", "AC0", "R", "passive"),
+    ("3", "AC1", "R", "passive"),
+    ("4", "VSS", "B", "power_in"),
+    ("5", "SDA", "L", "bidirectional"),
+    ("6", "SCL", "L", "input"),
+    ("7", "GPO", "L", "open_collector"),
+    ("8", "VCC", "T", "power_in"),
+]
+
+XC6206 = [
+    ("3", "VI",  "L", "power_in"),
+    ("2", "VO",  "R", "power_out"),
+    ("1", "VSS", "B", "power_in"),
 ]
 
 PIN_LEN = 2.54
@@ -204,6 +223,18 @@ def main():
         "f91_footprints:Murata_LFB18_1608",
         "https://www.murata.com/products/productdata/8796762800158/QNET2207.pdf",
         "Integrated balun-filter 2.4GHz for CC26xx, 1.6x0.8mm",
+    )
+    out += symbol(
+        "ST25DV04K_SO8", ST25DV04K_SO8, "ST25DV04K-IER8C3",
+        "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm",
+        "https://www.st.com/resource/en/datasheet/st25dv04k.pdf",
+        "Dynamic NFC/RFID tag IC with 4-Kbit EEPROM, SO8, no exposed pad",
+    )
+    out += symbol(
+        "XC6206PxxxMR_F91", XC6206, "XC6206P302MR",
+        "f91_footprints:Back_SOT-23",
+        "https://product.torexsemi.com/system/files/series/xc6206.pdf",
+        "3.0 V low-power LDO regulator, SOT-23",
     )
     out += ")\n"
 

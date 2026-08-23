@@ -29,10 +29,10 @@ board: U1–U2 gap; LCD moved to top-edge DIOs facing J1).
 | 35  | —       | nRESET        | Reset (pull to VDDS via R1)       |
 | 37  | DIO_24  | HAPTIC_EN     | DRV2605L enable                   |
 | 38  | DIO_25  | BTN_2         | Button 2 (SW2, right edge)        |
-| 39  | DIO_26  | LCD_EXTCOMIN  | Sharp LCD VCOM toggle             |
+| 39  | DIO_26  | LCD_SCLK      | Sharp LCD SPI SCLK                |
 | 40  | DIO_27  | LCD_MOSI      | Sharp LCD SPI MOSI                |
-| 41  | DIO_28  | LCD_SCLK      | Sharp LCD SPI SCLK                |
-| 42  | DIO_29  | LCD_CS        | Sharp LCD CS — **ACTIVE HIGH**    |
+| 41  | DIO_28  | LCD_CS        | Sharp LCD CS — **ACTIVE HIGH**    |
+| 42  | DIO_29  | LCD_EXTCOMIN  | Sharp LCD VCOM toggle             |
 | 43  | DIO_30  | LCD_DISP      | Sharp LCD DISP                    |
 | 46  | —       | X48M_N        | 48 MHz crystal (Y1)               |
 | 47  | —       | X48M_P        | 48 MHz crystal (Y1)               |
@@ -43,6 +43,9 @@ no-connect in schematic).
 
 ## History
 
+- 2026-07-11: reordered SCLK/CS/EXTCOMIN within the already reserved DIO_26-29
+  LCD group so U1 and J1 pad order matches physically and the five traces do
+  not cross. MOSI and DISP remain on DIO_27 and DIO_30.
 - 2026-07-02: LCD_MOSI/SCLK/CS/DISP/EXTCOMIN moved from DIO_9–13 (pads
   15–19, U1 south — trapped by U2) to DIO_27/28/29/30/26 (top edge, face
   J1). BTN_1 DIO_15→DIO_0, BTN_3 DIO_26→DIO_20. `tools/repin_lcd.py`.

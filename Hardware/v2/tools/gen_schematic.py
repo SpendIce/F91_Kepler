@@ -109,7 +109,7 @@ def emit_instance(ref, lib_id, value, footprint, x, y, pin_nets):
         f'\t\t(at {fmt(x)} {fmt(y)} 0)\n'
         f'\t\t(unit 1)\n'
         f'\t\t(exclude_from_sim no)\n'
-        f'\t\t(in_bom yes)\n'
+        f'\t\t(in_bom {"no" if ref.startswith("TP") else "yes"})\n'
         f'\t\t(on_board yes)\n'
         f'\t\t(dnp no)\n'
         f'\t\t(uuid "{u()}")\n'

@@ -23,19 +23,26 @@ import numpy as np
 import pcbnew
 
 BOARD, DRCJSON = sys.argv[1], sys.argv[2]
-RES = 0.05                      # mm per cell
+RES = 0.05                      # mm per cell for 0.127 mm production routing
 W, H = 25.0, 27.0
 NX, NY = int(W / RES) + 1, int(H / RES) + 1
-CLR = 0.15
-VIA_D, VIA_DRILL = 0.46, 0.20   # JLC: annular 0.13 exact, drill 0.2
+CLR = 0.127
+VIA_D, VIA_DRILL = 0.40, 0.20   # project manufacturing minimums
 EDGE = 0.30                     # copper-edge margin (rule 0.22)
-GROW = CLR + 0.10 + 0.04        # tracks/vias: clearance + half-width + quantization
-PAD_GROW = CLR + 0.10 + 0.01    # pads: tight margin — 0.5-pitch QFN escape gap is
-                                # 0.275 vs 0.25 required; +0.04 would wall it off
+GROW = CLR + 0.064 + 0.025       # signal half-width + half-grid quantization
+PAD_GROW = CLR + 0.064           # exact declared clearance around pads
 SOFT_PEN = 12.0                 # extra cost per soft-blocked cell
-MAX_RIP = 4                     # skip paths that would rip more nets than this
+MAX_RIP = 0                     # monotonic manufacturing flow: never rip routed nets
 RIP_CAP = 3                     # nets ripped this many times become un-rippable
-HISTFILE = "/tmp/claude-1000/-home-spendice-Documents-F91-Kepler/7705a934-d92f-4e5f-a5fd-73570a1a964a/scratchpad/ripcount.json"
+HISTFILE = "/tmp/f91_kepler_grid_router_ripcount.json"
+
+# These nets require controlled geometry or bench tuning and must never be
+# delegated to the generic grid router.
+MANUAL_NETS = {
+    "RF_P", "RF_N", "RF_BAL", "RF_UNBAL", "ANT_FEED",
+    "X48M_P", "X48M_N", "X32K_1", "X32K_2", "DCDC_SW",
+    "AC1", "AC2", "COIL1", "COIL2", "NFC_A", "NFC_B",
+}
 
 b = pcbnew.LoadBoard(BOARD)
 def mm(v): return pcbnew.ToMM(v)
@@ -50,7 +57,7 @@ pwr = {"VBAT", "BATN", "+3V0", "VDDS", "VDDR", "DCDC_SW", "DCOUPL", "MOT_P",
        "DRV_REG", "CLAMP2", "COMM2", "COIL1", "COIL2", "DW_VCC", "BOOT1"}
 
 def width_for(net):
-    return 0.35 if net in pwr else 0.20
+    return 0.25 if net in pwr else 0.127
 
 # --- grids: value = net code owning the cell, -1 free, -2 hard multi-net ---
 hard = {i: np.full((NY, NX), -1, np.int32) for i in ALL_L}
@@ -93,7 +100,11 @@ for fp in b.GetFootprints():
         code = p.GetNetCode() if p.GetNetname() else -2
         sl = cells_rect(mm(bb.GetLeft()), mm(bb.GetTop()),
                         mm(bb.GetRight()), mm(bb.GetBottom()), PAD_GROW)
-        for layer in ALL_L if p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH else (FCU,):
+        pad_layers = ALL_L if p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH else tuple(
+            router_layer for pcb_layer, router_layer in KLAYER.items()
+            if p.IsOnLayer(pcb_layer)
+        )
+        for layer in pad_layers:
             g = hard[layer]
             cur = g[sl]
             g[sl] = np.where((cur != -1) & (cur != code), -2, code)
@@ -154,6 +165,8 @@ conns = []
 zone_stubs = []     # (net, (x,y), layers): item pairs vs a Zone (bogus pos 0,0)
 for u in d.get("unconnected_items", []):
     net = re.search(r"\[(.*?)\]", u["items"][0]["description"]).group(1)
+    if net in MANUAL_NETS:
+        continue
     items = u["items"]
     if len(items) != 2:
         continue

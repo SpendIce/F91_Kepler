@@ -28,7 +28,7 @@ FIXED = {
     "J1": (12.5,  4.5, 180),   # LCD FPC, top edge
     # Johanson 2450AT18A100 chip antenna — TOP-LEFT corner, horizontal on TOP
     # edge (left of J1). Frees the left edge for SW1. 6.5mm ground keepout below.
-    "AE1": (4.3,  1.9,   0),
+    "AE1": (4.3,  1.9, 180),
     "SW1": (2.2,  9.0, 270),   # BTN1 / BSL, left edge (original spot, now free)
     "SW2": (22.8, 7.0,  90),   # BTN2, right-top edge (clear of TR arc)
     "SW3": (22.8, 19.0, 90),   # BTN3, right-bottom edge
@@ -43,6 +43,10 @@ FIXED = {
     "TP1": (5.6, 25.5, 0), "TP2": (7.9, 25.5, 0), "TP3": (10.2, 25.5, 0),
     "TP4": (12.5, 25.5, 0), "TP5": (14.8, 25.5, 0), "TP6": (17.1, 25.5, 0),
     "TP7": (19.4, 25.5, 0),
+    # Verified pull-up offset: leaves room for the local +3V0 F/B transition.
+    "R14": (5.0, 6.65, 0),
+    # Shifted left to preserve the DRV2605L right-side motor/power escape.
+    "U6": (5.9, 16.95, 0),
 }
 
 # ── SEED parts: movable big parts, placed nearest-free to a home hint ─────────
@@ -53,7 +57,6 @@ SEED = {
     "Q1": (21.5,  8.5,   0),   # FS8205A dual-FET, upper-right
     "U4": (19.5, 14.5, 180),   # XC6206 LDO
     "U5": ( 6.5,  8.5,   0),   # LIS2DW12 accel, left
-    "U6": ( 4.0, 18.0,   0),   # DRV2605L haptic, left-mid
     "U7": ( 8.5,  6.5,   0),   # ST25DV NFC (moved right, out of antenna keepout)
     "Y1": (10.0, 19.0,   0),   # 48 MHz xtal, below U1
     "Y2": ( 5.5, 13.0,   0),   # 32 kHz xtal, left of U1
